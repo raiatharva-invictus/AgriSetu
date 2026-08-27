@@ -21,7 +21,7 @@ export default function TabLayout() {
           elevation: 8,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: '600',
         },
       }}
@@ -33,7 +33,20 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'home' : 'home-outline'}
-              size={24}
+              size={22}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="cases"
+        options={{
+          title: 'मामले (Cases)',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'folder-open' : 'folder-open-outline'}
+              size={22}
               color={color}
             />
           ),
@@ -46,7 +59,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'help-circle' : 'help-circle-outline'}
-              size={26}
+              size={24}
               color={color}
             />
           ),
@@ -59,7 +72,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'people' : 'people-outline'}
-              size={25}
+              size={22}
               color={color}
             />
           ),
@@ -72,7 +85,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <MaterialCommunityIcons
               name={focused ? 'sprout' : 'sprout-outline'}
-              size={25}
+              size={22}
               color={color}
             />
           ),
@@ -81,11 +94,11 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'मेरा खेत (Profile)',
+          title: 'प्रोफाइल',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'person' : 'person-outline'}
-              size={24}
+              size={22}
               color={color}
             />
           ),

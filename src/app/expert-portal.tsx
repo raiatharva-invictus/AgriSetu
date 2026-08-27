@@ -13,13 +13,14 @@ import { IncomingRequestCard } from '@/components/expert-portal/IncomingRequestC
 import { ExpertQuickNav, ExpertNavTab } from '@/components/expert-portal/ExpertQuickNav';
 import { ExpertConsultationsTab } from '@/components/expert-portal/ExpertConsultationsTab';
 import { ExpertFarmersRosterTab } from '@/components/expert-portal/ExpertFarmersRosterTab';
+import { ExpertCasesTab } from '@/components/expert-portal/ExpertCasesTab';
 import { ExpertProfileHeader } from '@/components/experts/ExpertProfileHeader';
 import { ExpertProfessionalWork } from '@/components/experts/ExpertProfessionalWork';
 import { DemoResetButton } from '@/components/common/DemoResetButton';
 
 export default function ExpertPortalScreen() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<ExpertNavTab>('requests');
+  const [activeTab, setActiveTab] = useState<ExpertNavTab | 'cases'>('requests');
   const [requests, setRequests] = useState<ExpertConsultationRequest[]>(mockExpertRequests);
 
   const expert = mockExperts[0]; // Dr. Suresh Deshmukh
@@ -73,7 +74,7 @@ export default function ExpertPortalScreen() {
 
       <View style={styles.content}>
         {/* Quick Nav Tabs */}
-        <ExpertQuickNav activeTab={activeTab} onTabChange={setActiveTab} />
+        <ExpertQuickNav activeTab={activeTab as any} onTabChange={setActiveTab as any} />
 
         {/* Tab 1: Pending Consultation Requests */}
         {activeTab === 'requests' && (
@@ -112,7 +113,10 @@ export default function ExpertPortalScreen() {
         {/* Tab 3: Farmers Roster & History */}
         {activeTab === 'farmers' && <ExpertFarmersRosterTab />}
 
-        {/* Tab 4: Scientist Profile & Proof of Work Portfolio */}
+        {/* Tab 4: Expert Cases Suite */}
+        {activeTab === 'cases' && <ExpertCasesTab />}
+
+        {/* Tab 5: Scientist Profile & Proof of Work Portfolio */}
         {activeTab === 'profile' && (
           <View>
             <SectionHeader

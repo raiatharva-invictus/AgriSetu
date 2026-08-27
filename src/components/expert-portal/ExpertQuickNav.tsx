@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, BorderRadius, Spacing } from '@/constants/theme';
 import { Typography } from '../ui/Typography';
 
-export type ExpertNavTab = 'requests' | 'consultations' | 'farmers' | 'profile';
+export type ExpertNavTab = 'requests' | 'cases' | 'consultations' | 'farmers' | 'profile';
 
 interface ExpertQuickNavProps {
   activeTab: ExpertNavTab;
@@ -16,9 +16,10 @@ export const ExpertQuickNav: React.FC<ExpertQuickNavProps> = ({
   onTabChange,
 }) => {
   const tabs: { key: ExpertNavTab; label: string; iconName: keyof typeof Ionicons.glyphMap }[] = [
-    { key: 'requests', label: 'नए अनुरोध (Requests)', iconName: 'mail-unread-outline' },
+    { key: 'requests', label: 'अनुरोध (Requests)', iconName: 'mail-unread-outline' },
+    { key: 'cases', label: 'मामले (Cases)', iconName: 'folder-open-outline' },
     { key: 'consultations', label: 'परामर्श व कॉल', iconName: 'call-outline' },
-    { key: 'farmers', label: 'किसान सूची (Farmers)', iconName: 'people-outline' },
+    { key: 'farmers', label: 'किसान सूची', iconName: 'people-outline' },
     { key: 'profile', label: 'प्रोफाइल व प्रमाण', iconName: 'person-circle-outline' },
   ];
 

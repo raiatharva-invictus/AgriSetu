@@ -46,7 +46,6 @@ export default function HomeScreen() {
     updateFarmerProfile,
     updateExpertProfile,
     completeOnboarding,
-    resetOnboarding,
   } = useAuth();
 
   const [entryState, setEntryState] = useState<EntryState>('splash');
@@ -86,6 +85,13 @@ export default function HomeScreen() {
     loadData();
   }, []);
 
+  // Safe navigation side effect for Expert Role Routing
+  useEffect(() => {
+    if (!isSessionLoading && hasCompletedOnboarding && userRole === 'expert') {
+      router.replace('/expert-portal');
+    }
+  }, [isSessionLoading, hasCompletedOnboarding, userRole]);
+
   const handleRefresh = () => {
     setRefreshing(true);
     loadData();
@@ -113,7 +119,7 @@ export default function HomeScreen() {
   const handleExpertOnboardingComplete = async (profile: Partial<AgriculturalExpert>) => {
     updateExpertProfile(profile);
     await completeOnboarding(language);
-    router.push('/expert-portal');
+    router.replace('/expert-portal');
   };
 
   // 1. Loading Session State
@@ -158,10 +164,13 @@ export default function HomeScreen() {
     }
   }
 
-  // 3. PERSISTED EXPERT ROLE EXPERIENCE
+  // 3. PERSISTED EXPERT ROLE EXPERIENCE (Safe redirect rendering placeholder)
   if (userRole === 'expert') {
-    // If expert role is active, auto-route to Expert Portal Dashboard
-    router.push('/expert-portal');
+    return (
+      <ScreenContainer>
+        <LoadingState message="Opening Expert Portal..." />
+      </ScreenContainer>
+    );
   }
 
   // 4. PERSISTED FARMER ROLE EXPERIENCE
@@ -204,7 +213,7 @@ export default function HomeScreen() {
       {/* Active Crop Query Tracker */}
       <ActiveCaseTracker
         activeCase={activeCase}
-        onCasePress={(c) => router.push('/ask-help')}
+        onCasePress={() => router.push('/ask-help')}
         onViewAllPress={() => router.push('/ask-help')}
       />
 
@@ -221,7 +230,7 @@ export default function HomeScreen() {
       <FeaturedExpertsSection
         experts={experts}
         onExpertCall={(exp) => Alert.alert('Call Expert', `Calling ${exp.name}...`)}
-        onExpertChat={(exp) => router.push('/ask-help')}
+        onExpertChat={() => router.push('/ask-help')}
         onViewAllPress={() => router.push('/experts')}
       />
 

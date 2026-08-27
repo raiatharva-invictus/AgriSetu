@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, Alert, ViewStyle } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, BorderRadius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
@@ -14,6 +15,7 @@ export const DemoResetButton: React.FC<DemoResetButtonProps> = ({
   style,
   variant = 'dark',
 }) => {
+  const router = useRouter();
   const { resetOnboarding } = useAuth();
 
   const handleReset = () => {
@@ -27,6 +29,7 @@ export const DemoResetButton: React.FC<DemoResetButtonProps> = ({
           style: 'destructive',
           onPress: async () => {
             await resetOnboarding();
+            router.replace('/');
           },
         },
       ]
