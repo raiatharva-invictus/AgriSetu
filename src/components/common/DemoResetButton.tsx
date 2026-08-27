@@ -23,14 +23,16 @@ export const DemoResetButton: React.FC<DemoResetButtonProps> = ({
       await resetOnboarding();
       if (Platform.OS === 'web' && typeof window !== 'undefined') {
         window.localStorage.clear();
-        window.location.href = '/';
+        window.sessionStorage.clear();
+        window.location.href = window.location.origin + '/';
+        window.location.reload();
       } else {
         router.replace('/');
       }
     } catch (e) {
       console.warn('Reset error:', e);
       if (typeof window !== 'undefined') {
-        window.location.href = '/';
+        window.location.reload();
       }
     }
   };
