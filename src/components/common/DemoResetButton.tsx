@@ -24,16 +24,13 @@ export const DemoResetButton: React.FC<DemoResetButtonProps> = ({
       if (Platform.OS === 'web' && typeof window !== 'undefined') {
         window.localStorage.clear();
         window.sessionStorage.clear();
-        window.location.href = window.location.origin + '/';
         window.location.reload();
       } else {
         router.replace('/');
       }
     } catch (e) {
       console.warn('Reset error:', e);
-      if (typeof window !== 'undefined') {
-        window.location.reload();
-      }
+      router.replace('/');
     }
   };
 
@@ -42,7 +39,7 @@ export const DemoResetButton: React.FC<DemoResetButtonProps> = ({
       const confirmed =
         typeof window !== 'undefined' && window.confirm
           ? window.confirm(
-              'Reset Demo State?\n\nThis will clear local session storage and restart the app from Splash & Language Selection. Useful for live hackathon presentations.'
+              'Reset Demo State?\n\nThis will clear local session storage and restart the app from Splash & Language Selection.'
             )
           : true;
 
@@ -80,7 +77,7 @@ export const DemoResetButton: React.FC<DemoResetButtonProps> = ({
       <Ionicons
         name="refresh-circle-outline"
         size={18}
-        color={isDark ? Colors.harvestAmber : Colors.harvestAmber}
+        color={Colors.harvestAmber}
       />
       <Typography
         variant="caption"

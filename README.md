@@ -1,56 +1,86 @@
-# Welcome to your Expo app 👋
+# AgriSetu (कृषिसेतु) — Mobile Application
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+AgriSetu is a human-centered mobile application designed for Indian farmers and agricultural experts. It bridges the gap between rural crop health issues and certified agricultural scientists (ICAR / KVK / Private Agronomists).
 
-## Get started
+---
 
-1. Install dependencies
+## 🛠️ QA & Development Workflow (Android Emulator First)
 
-   ```bash
-   npm install
-   ```
+We separate development and testing into two distinct levels to avoid slow Gradle/APK builds during ordinary feature work:
 
-2. Start the app
+### LEVEL 1 — DEVELOPMENT (Android Emulator)
+> **Purpose**: Fast iteration, UI changes, and functional testing via Fast Refresh. No APK build required.
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+#### 1. Start Android Emulator & Expo Server
 ```bash
-npm run reset-project
+# Launch Expo development server targeting Android emulator
+npm run android
+
+# Or general dev server
+npm run dev
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+#### 2. Live Emulator Development Workflow
+1. Start your AVD / Android Emulator in Android Studio (`emulator -avd <your_avd_name>`).
+2. Run `npm run android`. Expo will connect directly to the emulator.
+3. Edit code in your IDE — changes reflect instantly via **Fast Refresh**.
+4. Test live flows:
+   - Splash & Language selection
+   - Farmer & Expert onboarding
+   - Session persistence
+   - Reset Demo button
+   - Ask for Help & Crop problem submission
+   - Expert Matching Engine & Ranking
+   - Consultation booking & Case status updates
 
-### Other setup steps
+---
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+### 🧪 AUTOMATED TESTING & SMOKE CHECKS
 
-## Learn more
+```bash
+# Run fast Android & Supabase data layer smoke tests
+npm run test:android
 
-To learn more about developing your project with Expo, look at the following resources:
+# Run TypeScript compilation check
+npx tsc --noEmit
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+### LEVEL 2 — RELEASE & APK CREATION
+> **Purpose**: Final milestone distributable build and physical Android device verification.
 
-Join our community of developers creating universal apps.
+#### Release Command
+```bash
+# Canonical milestone release APK build (EAS)
+npm run release:android
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+> [!IMPORTANT]
+> **Release Gate Criteria**:
+> `npm run release:android` should only be run at code-freeze milestones.
+> Pre-release checklist before triggering EAS APK creation:
+> 1. `npx tsc --noEmit` passes with 0 errors.
+> 2. `npm run test:android` passes all 32 acceptance items.
+> 3. Supabase database schema & RLS policies verified.
+
+---
+
+### 📱 Physical Device Verification Checklist
+
+After generating the APK via `npm run release:android` and installing on a physical Android phone, verify:
+- [ ] **Touch Interactions**: 48px+ touch targets responsive to thumb input.
+- [ ] **Keyboard Behavior**: Text inputs do not obscure action buttons.
+- [ ] **Image Upload**: Camera & gallery permissions and photo selection.
+- [ ] **Network & Offline Behavior**: Resilient data handling during network toggles.
+- [ ] **Supabase Persistence**: Session stays logged in after app kill & restart.
+- [ ] **Reset Demo**: Tapping Reset Demo returns the app to Splash & Language selection.
+
+---
+
+## 🏗️ Technical Architecture
+
+- **Framework**: React Native + Expo (Expo Router) + TypeScript
+- **Backend & Database**: Supabase PostgreSQL + Row Level Security (RLS) + Storage
+- **Matching Engine**: Weighted multi-factor scoring ([matchingEngine.ts](file:///d:/Hackathons/Jynex/AgriSetu/src/services/matchingEngine.ts))
+- **Localization**: 4 supported languages (`en`, `hi`, `bn`, `as`)
