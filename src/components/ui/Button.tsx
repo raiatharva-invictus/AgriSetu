@@ -125,9 +125,14 @@ export const Button: React.FC<ButtonProps> = ({
           {icon && <View style={styles.iconWrapper}>{icon}</View>}
           <View style={styles.textContainer}>
             <Typography
-              variant={size === 'hero' ? 'h3' : 'bodyBold'}
+              variant={size === 'hero' ? 'bodyBold' : size === 'small' ? 'caption' : 'bodyBold'}
               color={getTextColor()}
-              style={textStyle}
+              style={[
+                styles.buttonText,
+                size === 'hero' && styles.heroText,
+                textStyle,
+              ]}
+              align="center"
             >
               {title}
             </Typography>
@@ -135,6 +140,7 @@ export const Button: React.FC<ButtonProps> = ({
               <Typography
                 variant="caption"
                 color={variant === 'primary' ? 'rgba(255, 255, 255, 0.85)' : Colors.textSecondary}
+                align="center"
               >
                 {subtitle}
               </Typography>
@@ -151,7 +157,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
   },
   disabledContainer: {
@@ -163,12 +169,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 1,
+    flexWrap: 'wrap',
+    paddingVertical: 2,
   },
   iconWrapper: {
-    marginRight: Spacing.sm,
+    marginRight: Spacing.xs + 2,
   },
   textContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 1,
+  },
+  buttonText: {
+    fontSize: 14,
+    lineHeight: 19,
+    fontWeight: '700',
+  },
+  heroText: {
+    fontSize: 15,
+    lineHeight: 21,
+    fontWeight: '700',
   },
 });

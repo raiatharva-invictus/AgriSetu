@@ -38,9 +38,9 @@ export const HeroVoiceCameraAction: React.FC<HeroVoiceCameraActionProps> = ({
           activeOpacity={0.85}
         >
           <View style={styles.micCircle}>
-            <Ionicons name="mic" size={28} color={Colors.textOnPrimary} />
+            <Ionicons name="mic" size={26} color={Colors.textOnPrimary} />
           </View>
-          <Typography variant="bodyBold" color={Colors.textOnPrimary} align="center">
+          <Typography variant="bodyBold" color={Colors.textOnPrimary} align="center" style={styles.actionBtnText}>
             {t('speakProblem')}
           </Typography>
         </TouchableOpacity>
@@ -52,9 +52,9 @@ export const HeroVoiceCameraAction: React.FC<HeroVoiceCameraActionProps> = ({
           activeOpacity={0.85}
         >
           <View style={styles.cameraCircle}>
-            <Ionicons name="camera" size={28} color={Colors.textPrimary} />
+            <Ionicons name="camera" size={26} color={Colors.textPrimary} />
           </View>
-          <Typography variant="bodyBold" color={Colors.textPrimary} align="center">
+          <Typography variant="bodyBold" color={Colors.textPrimary} align="center" style={styles.actionBtnText}>
             {t('takeLeafPhoto')}
           </Typography>
         </TouchableOpacity>
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.accentLight,
     borderRadius: BorderRadius.xl,
-    padding: Spacing.lg,
+    padding: Spacing.md + 2,
     borderWidth: 2,
     borderColor: '#FDBA74',
     marginHorizontal: Spacing.lg,
@@ -84,28 +84,28 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   subTitle: {
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
     lineHeight: 20,
   },
   actionRow: {
     flexDirection: 'row',
-    gap: Spacing.md,
+    gap: Spacing.sm,
   },
   voiceButton: {
     flex: 1,
     backgroundColor: Colors.primary,
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.sm,
+    paddingHorizontal: Spacing.xs,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: TouchTargets.hero,
     ...Shadows.subtle,
   },
   micCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
@@ -118,18 +118,23 @@ const styles = StyleSheet.create({
     borderColor: Colors.cardBorder,
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.sm,
+    paddingHorizontal: Spacing.xs,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: TouchTargets.hero,
   },
   cameraCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: Colors.surfaceSecondary,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.xs,
+  },
+  actionBtnText: {
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: '700',
   },
 });

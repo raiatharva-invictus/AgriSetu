@@ -37,7 +37,7 @@ export const ProblemReviewCard: React.FC<ProblemReviewCardProps> = ({
             आपकी समस्या समझ आ गई है
           </Typography>
           <Typography variant="caption" color={Colors.textSecondary}>
-            We interpreted your query to match with certified KVK agricultural experts.
+            We interpreted your crop problem to match with verified agricultural experts.
           </Typography>
         </View>
       </View>
@@ -126,9 +126,9 @@ export const ProblemReviewCard: React.FC<ProblemReviewCardProps> = ({
 
       {/* Human Scientist Verification Disclaimer */}
       <View style={styles.humanTrustNotice}>
-        <Ionicons name="shield-checkmark" size={20} color={Colors.success} />
+        <Ionicons name="shield-checkmark" size={22} color={Colors.success} />
         <Typography variant="caption" color={Colors.success} style={styles.noticeText}>
-          यह जानकारी सीधे आईसीएआर (ICAR) व कृषि विज्ञान केंद्र के वैज्ञानिकों को भेजी जाएगी।
+          ये सभी विवरण आपके द्वारा चुने गए कृषि विशेषज्ञ को सीधे भेजे जाएंगे ताकि वे आपकी समस्या को समझ सकें। (These details will be sent directly to the expert you select so they can understand and resolve your crop problem.)
         </Typography>
       </View>
 
@@ -143,7 +143,7 @@ export const ProblemReviewCard: React.FC<ProblemReviewCardProps> = ({
           onPress={onConfirm}
           variant="primary"
           size="hero"
-          icon={<Ionicons name="checkmark-circle" size={22} color={Colors.textInverse} />}
+          icon={<Ionicons name="checkmark-circle" size={20} color={Colors.textInverse} />}
           style={styles.confirmBtn}
         />
 
@@ -253,8 +253,10 @@ const styles = StyleSheet.create({
   },
   confirmBtn: {
     backgroundColor: Colors.primary,
+    paddingVertical: Spacing.sm + 2,
   },
   editBtn: {
     borderColor: Colors.primary,
+    paddingVertical: Spacing.sm,
   },
 });
