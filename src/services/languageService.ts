@@ -1,4 +1,5 @@
 import { LanguageCode } from '@/locales';
+import { supabase } from '@/lib/supabase';
 
 export interface LanguageCapability {
   code: string;
@@ -171,22 +172,33 @@ export class SarvamAdapter {
   private model: string = 'saaras:v3'; // Official current Sarvam STT model
 
   async speechToText(audioUri: string, lang: string): Promise<STTResponse> {
+    const cap = LANGUAGE_REGISTRY[lang];
+    const bcp47 = cap?.bcp47Code || 'hi-IN';
+
+    // 1. Attempt live call to Supabase Edge Function (server-side SARVAM_API_KEY)
     try {
-      const cap = LANGUAGE_REGISTRY[lang];
-      const bcp47 = cap?.bcp47Code || 'hi-IN';
+      const { data, error } = await supabase.functions.invoke('language-speech', {
+        body: {
+          audio_uri: audioUri,
+          language_code: bcp47,
+          model: this.model,
+          provider: 'sarvam',
+        },
+      });
 
-      // Live payload structure for saaras:v3
-      const payload = {
-        model: this.model,
-        language_code: bcp47,
-        audio_uri: audioUri,
-      };
-
-      // When server Edge Function is active, calls POST /functions/v1/language-speech
+      if (!error && data && data.transcript) {
+        return {
+          transcript: data.transcript,
+          isLiveProvider: true,
+          provider: 'sarvam',
+          modelUsed: this.model,
+        };
+      }
     } catch (e) {
-      console.warn('Sarvam saaras:v3 ASR failed, using fallback:', e);
+      console.log('Edge Function language-speech note:', e);
     }
 
+    // 2. Resilient client-side fallback
     return this.getFallbackSTT(lang, 'sarvam', this.model);
   }
 
