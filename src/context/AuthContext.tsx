@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { FarmerProfile, AgriculturalExpert, UserRole } from '@/types';
 import { mockFarmer, mockExperts } from '@/data/mockData';
 import { sessionService, UserSession } from '@/services/sessionService';
+import { authService } from '@/services/authService';
 import { LanguageCode } from '@/locales';
 
 interface AuthContextType {
@@ -18,6 +19,15 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Generate RFC4122 v4 compliant UUID
+const generateUUID = (): string => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSessionLoading, setIsSessionLoading] = useState(true);
@@ -67,6 +77,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const completeOnboarding = async (lang: LanguageCode) => {
     if (!userRole) return;
     setHasCompletedOnboarding(true);
+
+    const userId = generateUUID();
+    const isFarmer = userRole === 'farmer';
+    const fullName = isFarmer ? farmerProfile.name : expertProfile.name;
+    const phone = isFarmer ? farmerProfile.phoneNumber : undefined;
+    const state = isFarmer ? farmerProfile.state : 'Maharashtra';
+    const district = isFarmer ? farmerProfile.district : 'Nagpur';
+    const village = isFarmer ? farmerProfile.village : expertProfile.institution;
+
+    // LIVE SUPABASE CLOUD DATABASE SYNC
+    try {
+      await authService.createProfile({
+        id: userId,
+        role: userRole,
+        full_name: fullName || 'AgriSetu User',
+        phone: phone || '+91 98765 43210',
+        preferred_language: lang,
+        state: state || 'Maharashtra',
+        district: district || 'Nagpur',
+        village: village || 'Center',
+      });
+      console.log('✓ Live Supabase user profile created successfully:', userId);
+    } catch (e: any) {
+      console.warn('Live Supabase sync note:', e.message || e);
+    }
 
     const session: UserSession = {
       role: userRole,

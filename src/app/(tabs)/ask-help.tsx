@@ -19,12 +19,14 @@ import {
   ProblemReviewCard,
   ProblemInterpretation,
 } from '@/components/ask/ProblemReviewCard';
+import { caseService } from '@/services/caseService';
 
 export default function AskHelpScreen() {
   const router = useRouter();
 
   // Multi-step Flow State: 1 = Guided Input, 2 = Interpretation Review, 3 = Expert Matched Success
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form & Input States
   const [transcript, setTranscript] = useState('');
@@ -67,8 +69,58 @@ export default function AskHelpScreen() {
     setStep(2);
   };
 
-  const handleConfirmAndFindExpert = () => {
-    router.push('/expert-match');
+  const handleConfirmAndFindExpert = async () => {
+    setIsSubmitting(true);
+    const descriptionText = transcript || typeText || 'Crop Disease & Pest Query';
+
+    try {
+      // 1. Insert case into Supabase backend
+      const createdCase = await caseService.createCase({
+        farmer_id: '11111111-1111-1111-1111-111111111111',
+        crop: selectedCrop,
+        title: interpretation.problemSummary,
+        description: descriptionText,
+        problem_category: 'pest_disease',
+        location: location,
+        urgency: urgency,
+        status: 'new',
+      });
+
+      if (createdCase && photoUrl) {
+        await caseService.addCaseImage(createdCase.id, photoUrl);
+      }
+
+      const caseId = createdCase ? createdCase.id : `c-${Date.now()}`;
+
+      // 2. Navigate to Expert Matching screen with structured case params
+      router.push({
+        pathname: '/expert-match',
+        params: {
+          caseId,
+          crop: selectedCrop,
+          problemCategory: 'Plant Pathology & Pest Control',
+          description: descriptionText,
+          location: location,
+          urgency: urgency,
+        },
+      });
+    } catch (err: any) {
+      console.warn('Case creation error:', err);
+      // Seamless fallback
+      router.push({
+        pathname: '/expert-match',
+        params: {
+          caseId: `c-${Date.now()}`,
+          crop: selectedCrop,
+          problemCategory: 'Plant Pathology',
+          description: descriptionText,
+          location: location,
+          urgency: urgency,
+        },
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

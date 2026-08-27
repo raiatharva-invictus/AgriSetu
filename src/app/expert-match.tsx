@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Typography } from '@/components/ui/Typography';
@@ -15,33 +15,88 @@ import { mockExperts } from '@/data/mockData';
 import { AgriculturalExpert } from '@/types';
 import { MatchedProblemSummary } from '@/components/experts/MatchedProblemSummary';
 import { ExpertMatchCard } from '@/components/experts/ExpertMatchCard';
+import { matchingEngine, StructuredCase } from '@/services/matchingEngine';
+import { consultationService } from '@/services/consultationService';
+import { caseService } from '@/services/caseService';
 
 export default function ExpertMatchScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{
+    caseId?: string;
+    crop?: string;
+    problemCategory?: string;
+    description?: string;
+    location?: string;
+    urgency?: string;
+  }>();
+
   const [activeFilter, setActiveFilter] = useState<'all' | 'online' | 'free'>('all');
 
-  const filterOptions = [
-    { key: 'all', label: `सभी विशेषज्ञ (${mockExperts.length})` },
-    { key: 'online', label: 'ऑनलाइन उपलब्ध (3)' },
-    { key: 'free', label: 'निःशुल्क मार्गदर्शन (4)' },
-  ];
+  // Construct Structured Case for Matching Engine
+  const structuredCase: StructuredCase = {
+    id: params.caseId || `c-${Date.now()}`,
+    farmerId: '11111111-1111-1111-1111-111111111111',
+    crop: params.crop || 'Cotton (कपास)',
+    problemCategory: params.problemCategory || 'Plant Pathology',
+    description: params.description || 'Red Leaf Edges & Curling',
+    location: params.location || 'Kalmeshwar, Nagpur',
+    urgency: (params.urgency as any) || 'Normal',
+    status: 'new',
+  };
 
-  const filteredExperts = mockExperts.filter((exp) => {
-    if (activeFilter === 'online') return exp.isOnline;
+  // Run Expert Matching Engine
+  const rankedResults = matchingEngine.rankExperts(structuredCase, mockExperts);
+
+  const filteredResults = rankedResults.filter((r) => {
+    if (activeFilter === 'online') return r.expert.isOnline;
+    if (activeFilter === 'free') return r.expert.feeText.toLowerCase().includes('free');
     return true;
   });
 
+  const filterOptions = [
+    { key: 'all', label: `सभी मिले विशेषज्ञ (${rankedResults.length})` },
+    { key: 'online', label: 'ऑनलाइन उपलब्ध' },
+    { key: 'free', label: 'निःशुल्क मार्गदर्शन' },
+  ];
+
   const handleViewProfile = (expert: AgriculturalExpert) => {
-    Alert.alert(
-      expert.name,
-      `${expert.designation}\n${expert.institution}\n\nSpecialty: ${expert.specialty.join(', ')}\nExperience: ${expert.experienceYears}+ Years`
-    );
+    router.push({
+      pathname: '/expert-detail',
+      params: { expertId: expert.id, caseId: structuredCase.id },
+    });
   };
 
-  const handleBookConsultation = (expert: AgriculturalExpert) => {
+  const handleBookConsultation = async (expert: AgriculturalExpert) => {
+    try {
+      // 1. Create consultation row in Supabase consultations table
+      await consultationService.createConsultation({
+        case_id: structuredCase.id,
+        farmer_id: structuredCase.farmerId,
+        expert_id: expert.id === '1' ? 'e1111111-1111-1111-1111-111111111111' : 'e2222222-2222-2222-2222-222222222222',
+        duration_minutes: 20,
+        price: expert.feeText.includes('₹') ? 199 : 0,
+        status: 'pending',
+      });
+
+      // 2. Update case status in Supabase cases table to consultation_pending
+      await caseService.updateCaseStatus(
+        structuredCase.id,
+        'consultation_pending',
+        expert.id === '1' ? 'e1111111-1111-1111-1111-111111111111' : 'e2222222-2222-2222-2222-222222222222'
+      );
+    } catch (e: any) {
+      console.warn('Supabase consultation booking note:', e);
+    }
+
     Alert.alert(
-      'Connecting with Scientist',
-      `You are being connected directly with ${expert.name}.\n\nFree Agricultural Guidance Line: Active`
+      'Consultation Requested!',
+      `Your query for ${structuredCase.crop} has been sent to ${expert.name}.\n\nStatus: Pending Scientist Confirmation.`,
+      [
+        {
+          text: 'View My Cases',
+          onPress: () => router.push('/cases'),
+        },
+      ]
     );
   };
 
@@ -55,10 +110,10 @@ export default function ExpertMatchScreen() {
 
         <View style={styles.headerTextGroup}>
           <Typography variant="hero" color="#FFFFFF">
-            आपकी समस्या के लिए {filteredExperts.length} कृषि विशेषज्ञ मिले
+            आपकी समस्या के लिए {filteredResults.length} कृषि विशेषज्ञ मिले
           </Typography>
           <Typography variant="caption" color="#D1FAE5" style={styles.headerSub}>
-            We found experts relevant to your specific Cotton leaf disease query
+            We found experts relevant to your specific {structuredCase.crop} query
           </Typography>
         </View>
       </View>
@@ -66,9 +121,9 @@ export default function ExpertMatchScreen() {
       <View style={styles.content}>
         {/* Compact Submitted Problem Recap */}
         <MatchedProblemSummary
-          cropName="Cotton (कपास)"
-          symptomSummary="पत्तियों के किनारों पर लाल धब्बे व मुड़ना"
-          location="Kalmeshwar, Nagpur"
+          cropName={structuredCase.crop}
+          symptomSummary={structuredCase.description}
+          location={structuredCase.location || 'Kalmeshwar, Nagpur'}
         />
 
         {/* Filter Chips */}
@@ -85,12 +140,12 @@ export default function ExpertMatchScreen() {
         </View>
 
         {/* List of Relevance-Matched Expert Cards */}
-        {filteredExperts.map((expert) => (
+        {filteredResults.map(({ expert }) => (
           <ExpertMatchCard
             key={expert.id}
             expert={expert}
-            onViewProfile={handleViewProfile}
-            onBookConsultation={handleBookConsultation}
+            onViewProfile={() => handleViewProfile(expert)}
+            onBookConsultation={() => handleBookConsultation(expert)}
           />
         ))}
 

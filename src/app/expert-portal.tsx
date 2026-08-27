@@ -17,6 +17,7 @@ import { ExpertCasesTab } from '@/components/expert-portal/ExpertCasesTab';
 import { ExpertProfileHeader } from '@/components/experts/ExpertProfileHeader';
 import { ExpertProfessionalWork } from '@/components/experts/ExpertProfessionalWork';
 import { DemoResetButton } from '@/components/common/DemoResetButton';
+import { caseService } from '@/services/caseService';
 
 export default function ExpertPortalScreen() {
   const router = useRouter();
@@ -25,15 +26,28 @@ export default function ExpertPortalScreen() {
 
   const expert = mockExperts[0]; // Dr. Suresh Deshmukh
 
-  const handleAcceptRequest = (req: ExpertConsultationRequest) => {
+  const handleAcceptRequest = async (req: ExpertConsultationRequest) => {
+    try {
+      // Sync status change to Supabase cases table
+      await caseService.updateCaseStatus(req.id, 'scheduled', 'e1111111-1111-1111-1111-111111111111');
+    } catch (e) {
+      console.warn('Accept request Supabase sync note:', e);
+    }
+
     Alert.alert(
       'Request Accepted',
-      `You have accepted ${req.farmerName}'s consultation request for ${req.cropName}.\n\nScheduled Call: ${req.requestedTime}`
+      `You have accepted ${req.farmerName}'s consultation request for ${req.cropName}.\n\nCase status updated to SCHEDULED.`
     );
     setRequests(requests.filter((r) => r.id !== req.id));
   };
 
-  const handleDeclineRequest = (req: ExpertConsultationRequest) => {
+  const handleDeclineRequest = async (req: ExpertConsultationRequest) => {
+    try {
+      await caseService.updateCaseStatus(req.id, 'cancelled');
+    } catch (e) {
+      console.warn('Decline request Supabase sync note:', e);
+    }
+
     Alert.alert(
       'Request Declined',
       `Request from ${req.farmerName} declined and re-routed to next available agronomist.`
