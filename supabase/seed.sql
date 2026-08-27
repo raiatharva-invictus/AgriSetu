@@ -6,13 +6,13 @@
 -- 1. SEED SPECIALIZATIONS
 -- ============================================================================
 INSERT INTO public.specializations (id, name, category) VALUES
-  ('s0000000-0000-0000-0000-000000000001', 'Cotton Diseases', 'crop_pathology'),
-  ('s0000000-0000-0000-0000-000000000002', 'Leaf Curl Virus', 'virology'),
-  ('s0000000-0000-0000-0000-000000000003', 'Sap-Sucking Pests', 'entomology'),
-  ('s0000000-0000-0000-0000-000000000004', 'Soil Micro-Nutrients', 'soil_science'),
-  ('s0000000-0000-0000-0000-000000000005', 'Soybean Pest Shield', 'crop_protection'),
-  ('s0000000-0000-0000-0000-000000000006', 'Drip Irrigation & Fertigation', 'water_management'),
-  ('s0000000-0000-0000-0000-000000000007', 'Organic Bio-Pesticides', 'organic')
+  ('a0000000-0000-0000-0000-000000000001', 'Cotton Diseases', 'crop_pathology'),
+  ('a0000000-0000-0000-0000-000000000002', 'Leaf Curl Virus', 'virology'),
+  ('a0000000-0000-0000-0000-000000000003', 'Sap-Sucking Pests', 'entomology'),
+  ('a0000000-0000-0000-0000-000000000004', 'Soil Micro-Nutrients', 'soil_science'),
+  ('a0000000-0000-0000-0000-000000000005', 'Soybean Pest Shield', 'crop_protection'),
+  ('a0000000-0000-0000-0000-000000000006', 'Drip Irrigation & Fertigation', 'water_management'),
+  ('a0000000-0000-0000-0000-000000000007', 'Organic Bio-Pesticides', 'organic')
 ON CONFLICT (name) DO NOTHING;
 
 -- ============================================================================
@@ -39,10 +39,10 @@ ON CONFLICT (user_id) DO NOTHING;
 -- 4. SEED EXPERT SPECIALIZATIONS
 -- ============================================================================
 INSERT INTO public.expert_specializations (expert_id, specialization_id) VALUES
-  ('e1111111-1111-1111-1111-111111111111', 's0000000-0000-0000-0000-000000000001'),
-  ('e1111111-1111-1111-1111-111111111102', 's0000000-0000-0000-0000-000000000002'),
-  ('e2222222-2222-2222-2222-222222222222', 's0000000-0000-0000-0000-000000000005'),
-  ('e3333333-3333-3333-3333-333333333333', 's0000000-0000-0000-0000-000000000004')
+  ('e1111111-1111-1111-1111-111111111111', 'a0000000-0000-0000-0000-000000000001'),
+  ('e1111111-1111-1111-1111-111111111111', 'a0000000-0000-0000-0000-000000000002'),
+  ('e2222222-2222-2222-2222-222222222222', 'a0000000-0000-0000-0000-000000000005'),
+  ('e3333333-3333-3333-3333-333333333333', 'a0000000-0000-0000-0000-000000000004')
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
@@ -59,24 +59,24 @@ ON CONFLICT (id) DO NOTHING;
 -- 6. SEED CONSULTATIONS & REVIEWS
 -- ============================================================================
 INSERT INTO public.consultations (id, case_id, farmer_id, expert_id, duration_minutes, price, status, notes) VALUES
-  ('cn111111-1111-1111-1111-111111111111', 'c1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'e1111111-1111-1111-1111-111111111111', 20, 0.00, 'completed', 'Diagnosed early Thrips & Whitefly infestation. Recommended foliar spray of Neem oil (5ml/L) + Imidacloprid (0.5ml/L).'),
-  ('cn222222-2222-2222-2222-222222222222', 'c2222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'e1111111-1111-1111-1111-111111111111', 15, 0.00, 'completed', 'Tricyclazole 75% WP spray advised at 0.6g per litre of water. Drainage improved.')
+  ('c0111111-1111-1111-1111-111111111111', 'c1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'e1111111-1111-1111-1111-111111111111', 20, 0.00, 'completed', 'Diagnosed early Thrips & Whitefly infestation. Recommended foliar spray of Neem oil (5ml/L) + Imidacloprid (0.5ml/L).'),
+  ('c0222222-2222-2222-2222-222222222222', 'c2222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'e1111111-1111-1111-1111-111111111111', 15, 0.00, 'completed', 'Tricyclazole 75% WP spray advised at 0.6g per litre of water. Drainage improved.')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.reviews (id, consultation_id, farmer_id, expert_id, rating, resolved_status, feedback) VALUES
-  ('r2222222-2222-2222-2222-222222222222', 'cn222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'e1111111-1111-1111-1111-111111111111', 5, 'solved', 'डॉक्टर साहब की सलाह से स्प्रे किया, 4 दिन में धान के पत्ते हरे हो गए।')
+  ('r2222222-2222-2222-2222-222222222222', 'c0222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'e1111111-1111-1111-1111-111111111111', 5, 'solved', 'डॉक्टर साहब की सलाह से स्प्रे किया, 4 दिन में धान के पत्ते हरे हो गए।')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================================
 -- 7. SEED TIP CATEGORIES & FREE TIPS
 -- ============================================================================
 INSERT INTO public.tip_categories (id, name) VALUES
-  ('tc000000-0000-0000-0000-000000000001', 'Pest Control'),
-  ('tc000000-0000-0000-0000-000000000002', 'Soil Nutrition'),
-  ('tc000000-0000-0000-0000-000000000003', 'Irrigation')
+  ('b0000000-0000-0000-0000-000000000001', 'Pest Control'),
+  ('b0000000-0000-0000-0000-000000000002', 'Soil Nutrition'),
+  ('b0000000-0000-0000-0000-000000000003', 'Irrigation')
 ON CONFLICT (name) DO NOTHING;
 
 INSERT INTO public.free_tips (id, category_id, title, summary, content, language, checkpoints) VALUES
-  ('ft111111-1111-1111-1111-111111111111', 'tc000000-0000-0000-0000-000000000001', '5 things to check when tomato or cotton leaves begin curling', 'Check under leaves for whiteflies, inspect soil moisture, and delay nitrogen fertilizers.', 'Leaf curling is often caused by sap-sucking pests like thrips or whiteflies rather than nutrient deficiency.', 'en', '["1. Turn over top leaves for flies", "2. Check leaf red edges", "3. Verify soil moisture"]'::jsonb),
-  ('ft222222-2222-2222-2222-222222222222', 'tc000000-0000-0000-0000-000000000002', 'Before applying fertilizer, check these 3 essential soil factors', 'Ensure moist soil, avoid application right before heavy rain, and split urea doses.', 'Applying nitrogen urea on dry soil results in up to 40% nutrient loss.', 'en', '["1. Apply only on moist soil", "2. Avoid heavy rain forecast", "3. Split urea doses"]'::jsonb)
+  ('f0111111-1111-1111-1111-111111111111', 'b0000000-0000-0000-0000-000000000001', '5 things to check when tomato or cotton leaves begin curling', 'Check under leaves for whiteflies, inspect soil moisture, and delay nitrogen fertilizers.', 'Leaf curling is often caused by sap-sucking pests like thrips or whiteflies rather than nutrient deficiency.', 'en', '["1. Turn over top leaves for flies", "2. Check leaf red edges", "3. Verify soil moisture"]'::jsonb),
+  ('f0222222-2222-2222-2222-222222222222', 'b0000000-0000-0000-0000-000000000002', 'Before applying fertilizer, check these 3 essential soil factors', 'Ensure moist soil, avoid application right before heavy rain, and split urea doses.', 'Applying nitrogen urea on dry soil results in up to 40% nutrient loss.', 'en', '["1. Apply only on moist soil", "2. Avoid heavy rain forecast", "3. Split urea doses"]'::jsonb)
 ON CONFLICT (id) DO NOTHING;
