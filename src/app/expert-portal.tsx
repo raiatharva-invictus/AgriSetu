@@ -11,8 +11,11 @@ import { ExpertConsultationRequest } from '@/types';
 import { ExpertDashboardHeader } from '@/components/expert-portal/ExpertDashboardHeader';
 import { IncomingRequestCard } from '@/components/expert-portal/IncomingRequestCard';
 import { ExpertQuickNav, ExpertNavTab } from '@/components/expert-portal/ExpertQuickNav';
+import { ExpertConsultationsTab } from '@/components/expert-portal/ExpertConsultationsTab';
+import { ExpertFarmersRosterTab } from '@/components/expert-portal/ExpertFarmersRosterTab';
 import { ExpertProfileHeader } from '@/components/experts/ExpertProfileHeader';
 import { ExpertProfessionalWork } from '@/components/experts/ExpertProfessionalWork';
+import { DemoResetButton } from '@/components/common/DemoResetButton';
 
 export default function ExpertPortalScreen() {
   const router = useRouter();
@@ -39,11 +42,12 @@ export default function ExpertPortalScreen() {
 
   return (
     <ScreenContainer scrollable={true}>
-      {/* Top Professional Portal Header Bar */}
+      {/* Top Professional Portal Header Bar with Demo Reset */}
       <View style={styles.topBar}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.push('/')}>
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
+
         <View style={styles.barTextGroup}>
           <Typography variant="h3" color="#FFFFFF">
             AgriSetu Expert Management Portal
@@ -52,9 +56,12 @@ export default function ExpertPortalScreen() {
             ICAR / KVK Verified Scientist Mode
           </Typography>
         </View>
+
+        {/* Prototype Demo Reset Action */}
+        <DemoResetButton variant="dark" />
       </View>
 
-      {/* Overview Dashboard Header & 4 Metrics */}
+      {/* Overview Dashboard Header & 4 Key Work Metrics */}
       <ExpertDashboardHeader
         expertName={expert.name}
         designation={expert.designation}
@@ -99,32 +106,19 @@ export default function ExpertPortalScreen() {
           </View>
         )}
 
-        {/* Tab 2: My Expertise */}
-        {activeTab === 'expertise' && (
-          <View>
-            <SectionHeader
-              title="मेरी कृषि विशेषज्ञता (My Specialization Areas)"
-              subtitle="ICAR व केवीके द्वारा प्रमाणित अनुसंधान क्षेत्र"
-            />
-            <ExpertProfileHeader expert={expert} />
-          </View>
-        )}
+        {/* Tab 2: Active Consultations & Scheduled Calls */}
+        {activeTab === 'consultations' && <ExpertConsultationsTab />}
 
-        {/* Tab 3: My Portfolio & Research Work */}
-        {activeTab === 'portfolio' && (
-          <View>
-            <SectionHeader
-              title="शोध कार्य व पोर्टफोलियो (Publications & Projects)"
-              subtitle="प्रकाशन, मैदानी परियोजनाएं व सरकारी प्रमाणन"
-            />
-            <ExpertProfessionalWork expert={expert} />
-          </View>
-        )}
+        {/* Tab 3: Farmers Roster & History */}
+        {activeTab === 'farmers' && <ExpertFarmersRosterTab />}
 
-        {/* Tab 4: Scientist Profile */}
+        {/* Tab 4: Scientist Profile & Proof of Work Portfolio */}
         {activeTab === 'profile' && (
           <View>
-            <SectionHeader title="वैज्ञानिक प्रोफाइल (Scientist Profile)" />
+            <SectionHeader
+              title="वैज्ञानिक प्रोफाइल व समाधान प्रमाण (Profile & Proof of Work)"
+              subtitle="किसान द्वारा स्वीकृत समाधान रिकॉर्ड व शोध कार्य"
+            />
             <ExpertProfileHeader expert={expert} />
             <ExpertProfessionalWork expert={expert} />
           </View>
@@ -146,7 +140,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   backBtn: {
-    marginRight: Spacing.md,
+    marginRight: Spacing.sm,
   },
   barTextGroup: {
     flex: 1,

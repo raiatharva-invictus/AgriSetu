@@ -264,6 +264,74 @@ export const mockExpertRequests: ExpertConsultationRequest[] = [
   },
 ];
 
+export const mockOngoingConsultations = [
+  {
+    id: 'cons-201',
+    farmerName: 'Subhash Rao',
+    location: 'Katol, Nagpur',
+    cropName: 'Tomato (टमाटर)',
+    problemTitle: 'Early blight fungal spots on lower leaves',
+    status: 'Call Scheduled',
+    time: 'Today at 3:15 PM',
+    phone: '+91 94231 09876',
+    stage: 'Awaiting Call Confirmation',
+  },
+  {
+    id: 'cons-202',
+    farmerName: 'Vithalrao Patil',
+    location: 'Kalmeshwar, Nagpur',
+    cropName: 'Cotton (कपास)',
+    problemTitle: 'Post-solution verification: Thrips recovery check',
+    status: 'Resolution Verification',
+    time: 'Yesterday',
+    phone: '+91 98902 34567',
+    stage: 'Farmer Feedback Submitted (Proof of Work Approved)',
+  },
+];
+
+export const mockAssignedFarmers = [
+  {
+    id: 'farm-01',
+    name: 'Rameshwar Patel',
+    village: 'Kalmeshwar',
+    district: 'Nagpur',
+    crops: ['Cotton (कपास)', 'Soybean (सोयाबीन)'],
+    casesHelped: 3,
+    lastContact: 'Today',
+    status: 'Active Request',
+  },
+  {
+    id: 'farm-02',
+    name: 'Ganpatrao Shinde',
+    village: 'Saoner',
+    district: 'Nagpur',
+    crops: ['Soybean (सोयाबीन)', 'Wheat (गेहूं)'],
+    casesHelped: 5,
+    lastContact: 'Yesterday',
+    status: 'Proof Approved',
+  },
+  {
+    id: 'farm-03',
+    name: 'Subhash Rao',
+    village: 'Katol',
+    district: 'Nagpur',
+    crops: ['Tomato (टमाटर)', 'Chilli (मिर्च)'],
+    casesHelped: 2,
+    lastContact: '2 days ago',
+    status: 'Call Scheduled',
+  },
+  {
+    id: 'farm-04',
+    name: 'Maroti Gaikwad',
+    village: 'Umred',
+    district: 'Nagpur',
+    crops: ['Cotton (कपास)'],
+    casesHelped: 4,
+    lastContact: '4 days ago',
+    status: 'Resolved',
+  },
+];
+
 export const mockSeasonalTips: SeasonalTip[] = [
   {
     id: 'tip-1',

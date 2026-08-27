@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, BorderRadius, Spacing } from '@/constants/theme';
 import { Typography } from '../ui/Typography';
 
-export type ExpertNavTab = 'requests' | 'expertise' | 'portfolio' | 'profile';
+export type ExpertNavTab = 'requests' | 'consultations' | 'farmers' | 'profile';
 
 interface ExpertQuickNavProps {
   activeTab: ExpertNavTab;
@@ -16,10 +16,10 @@ export const ExpertQuickNav: React.FC<ExpertQuickNavProps> = ({
   onTabChange,
 }) => {
   const tabs: { key: ExpertNavTab; label: string; iconName: keyof typeof Ionicons.glyphMap }[] = [
-    { key: 'requests', label: 'अनुरोध (Requests)', iconName: 'mail-unread-outline' },
-    { key: 'expertise', label: 'मेरी विशेषज्ञता', iconName: 'ribbon-outline' },
-    { key: 'portfolio', label: 'मेरा पोर्टफोलियो', iconName: 'folder-open-outline' },
-    { key: 'profile', label: 'प्रोफाइल', iconName: 'person-outline' },
+    { key: 'requests', label: 'नए अनुरोध (Requests)', iconName: 'mail-unread-outline' },
+    { key: 'consultations', label: 'परामर्श व कॉल', iconName: 'call-outline' },
+    { key: 'farmers', label: 'किसान सूची (Farmers)', iconName: 'people-outline' },
+    { key: 'profile', label: 'प्रोफाइल व प्रमाण', iconName: 'person-circle-outline' },
   ];
 
   return (
@@ -31,7 +31,7 @@ export const ExpertQuickNav: React.FC<ExpertQuickNavProps> = ({
             key={tab.key}
             style={[styles.navBtn, isSelected && styles.selectedNavBtn]}
             onPress={() => onTabChange(tab.key)}
-            activeOpacity={0.7}
+            activeOpacity={0.8}
           >
             <Ionicons
               name={tab.iconName}
@@ -68,6 +68,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.md,
+    marginBottom: Spacing.xs,
   },
   selectedNavBtn: {
     backgroundColor: Colors.primary,

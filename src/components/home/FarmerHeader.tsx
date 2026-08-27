@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing } from '@/constants/theme';
 import { useLanguage } from '@/context/LanguageContext';
 import { Typography } from '../ui/Typography';
-import { IconButton } from '../ui/IconButton';
 import { Avatar } from '../ui/Avatar';
-import { LanguageModal } from '../ui/LanguageModal';
+import { DemoResetButton } from '../common/DemoResetButton';
 
 interface FarmerHeaderProps {
   farmerName: string;
@@ -19,11 +18,9 @@ interface FarmerHeaderProps {
 export const FarmerHeader: React.FC<FarmerHeaderProps> = ({
   farmerName,
   location,
-  onNotificationPress,
   onProfilePress,
 }) => {
-  const { t, currentLanguageInfo } = useLanguage();
-  const [langModalVisible, setLangModalVisible] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <View style={styles.header}>
@@ -42,36 +39,13 @@ export const FarmerHeader: React.FC<FarmerHeaderProps> = ({
             <Typography variant="caption" color="#D1FAE5" style={styles.locationText}>
               {location}
             </Typography>
-
-            {/* Language Selector Chip */}
-            <TouchableOpacity
-              style={styles.langChip}
-              onPress={() => setLangModalVisible(true)}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="language" size={10} color={Colors.primaryDark} />
-              <Typography variant="caption" color={Colors.primaryDark} style={styles.langText}>
-                {currentLanguageInfo.nativeName}
-              </Typography>
-            </TouchableOpacity>
           </View>
         </View>
       </View>
 
       <View style={styles.rightActions}>
-        <IconButton
-          icon={<Ionicons name="notifications-outline" size={22} color={Colors.textOnPrimary} />}
-          onPress={onNotificationPress}
-          variant="ghost"
-          accessibilityLabel="Notifications"
-        />
+        <DemoResetButton variant="dark" />
       </View>
-
-      {/* Language Modal */}
-      <LanguageModal
-        visible={langModalVisible}
-        onClose={() => setLangModalVisible(false)}
-      />
     </View>
   );
 };
@@ -102,20 +76,6 @@ const styles = StyleSheet.create({
   },
   locationText: {
     marginLeft: 3,
-  },
-  langChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#A7F3D0',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    marginLeft: Spacing.sm,
-  },
-  langText: {
-    fontWeight: '700',
-    fontSize: 10,
-    marginLeft: 2,
   },
   rightActions: {
     flexDirection: 'row',
