@@ -21,8 +21,30 @@ export const ExpertCard: React.FC<ExpertCardProps> = ({
   onChatPress,
   style,
 }) => {
+  const getOrgTag = () => {
+    switch (expert.organizationType) {
+      case 'private_company':
+        return { label: 'Private Agribusiness Specialist', color: '#1E40AF', bg: '#DBEAFE' };
+      case 'independent_agronomist':
+        return { label: 'Independent Soil Agronomist', color: '#065F46', bg: '#D1FAE5' };
+      case 'icar_kvk':
+      default:
+        return { label: 'ICAR / KVK Certified Scientist', color: Colors.primaryDark, bg: Colors.primaryContainer };
+    }
+  };
+
+  const orgTag = getOrgTag();
+
   return (
     <View style={[styles.card, style]}>
+      {/* Top Organization Tag */}
+      <View style={[styles.orgTag, { backgroundColor: orgTag.bg }]}>
+        <Ionicons name="shield-checkmark" size={12} color={orgTag.color} />
+        <Typography variant="caption" color={orgTag.color} style={styles.orgTagText}>
+          {orgTag.label}
+        </Typography>
+      </View>
+
       <View style={styles.topRow}>
         <Avatar
           name={expert.name}
@@ -37,12 +59,15 @@ export const ExpertCard: React.FC<ExpertCardProps> = ({
             <Typography variant="h3" color={Colors.textPrimary} style={styles.nameText}>
               {expert.name}
             </Typography>
-            <View style={styles.ratingBadge}>
-              <Ionicons name="star" size={14} color="#D97706" />
-              <Typography variant="caption" color="#92400E" style={styles.ratingText}>
-                {expert.rating}
-              </Typography>
-            </View>
+
+            {expert.verifiedResolutionsCount ? (
+              <View style={styles.verifiedBadge}>
+                <Ionicons name="checkmark-circle" size={13} color={Colors.primary} />
+                <Typography variant="caption" color={Colors.primaryDark} style={styles.verifiedBadgeText}>
+                  {expert.verifiedResolutionsCount} Solved
+                </Typography>
+              </View>
+            ) : null}
           </View>
 
           <Typography variant="label" color={Colors.primary}>
@@ -53,6 +78,16 @@ export const ExpertCard: React.FC<ExpertCardProps> = ({
           </Typography>
         </View>
       </View>
+
+      {/* Proof of Work Highlight Banner */}
+      {expert.verifiedResolutions && expert.verifiedResolutions.length > 0 && (
+        <View style={styles.proofBanner}>
+          <Ionicons name="ribbon-outline" size={14} color={Colors.accentDark} />
+          <Typography variant="caption" color={Colors.accentDark} style={styles.proofBannerText}>
+            किसान द्वारा सत्यापित प्रमाण: "{expert.verifiedResolutions[0].farmerFeedback.slice(0, 55)}..."
+          </Typography>
+        </View>
+      )}
 
       <View style={styles.specialtyContainer}>
         {expert.specialty.map((spec) => (
@@ -103,6 +138,20 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     ...Shadows.subtle,
   },
+  orgTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+    borderRadius: BorderRadius.sm,
+    alignSelf: 'flex-start',
+    marginBottom: Spacing.xs,
+  },
+  orgTagText: {
+    fontWeight: '700',
+    marginLeft: 4,
+    fontSize: 10,
+  },
   topRow: {
     flexDirection: 'row',
   },
@@ -118,23 +167,39 @@ const styles = StyleSheet.create({
   nameText: {
     flex: 1,
   },
-  ratingBadge: {
+  verifiedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF3C7',
+    backgroundColor: Colors.primaryContainer,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 8,
   },
-  ratingText: {
+  verifiedBadgeText: {
     fontWeight: '700',
-    marginLeft: 2,
+    marginLeft: 3,
+    fontSize: 10,
+  },
+  proofBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.accentLight,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.md,
+    marginTop: Spacing.sm,
+  },
+  proofBannerText: {
+    marginLeft: 6,
+    flex: 1,
+    fontSize: 11,
+    fontStyle: 'italic',
   },
   specialtyContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.xs,
-    marginVertical: Spacing.md,
+    marginVertical: Spacing.sm,
   },
   specialtyChip: {
     backgroundColor: Colors.surfaceSecondary,

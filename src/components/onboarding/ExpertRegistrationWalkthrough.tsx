@@ -3,6 +3,7 @@ import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, BorderRadius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
+import { OrganizationType } from '@/types';
 import { Typography } from '../ui/Typography';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
@@ -23,14 +24,22 @@ export const ExpertRegistrationWalkthrough: React.FC<ExpertRegistrationWalkthrou
   const [name, setName] = useState(expertProfile.name);
   const [designation, setDesignation] = useState(expertProfile.designation);
   const [institution, setInstitution] = useState(expertProfile.institution);
+  const [orgType, setOrgType] = useState<OrganizationType>(expertProfile.organizationType || 'icar_kvk');
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>(expertProfile.specialty);
   const [feeText, setFeeText] = useState(expertProfile.feeText);
+
+  const orgOptions: { key: OrganizationType; label: string }[] = [
+    { key: 'icar_kvk', label: 'ICAR / KVK Government Scientist' },
+    { key: 'private_company', label: 'Private Agribusiness (Syngenta, Bayer, etc.)' },
+    { key: 'independent_agronomist', label: 'Independent Soil Doctor & Agronomist' },
+    { key: 'krishi_officer', label: 'Krishi Officer / Field Extension Specialist' },
+  ];
 
   const specialtyOptions = [
     'Cotton Diseases',
     'Sap-Sucking Pests',
-    'Soil Health',
-    'NPK Micro-Nutrients',
+    'Soybean Pest Shield',
+    'Soil Micro-Nutrients',
     'Drip Irrigation',
     'Organic Pest Control',
   ];
@@ -46,8 +55,9 @@ export const ExpertRegistrationWalkthrough: React.FC<ExpertRegistrationWalkthrou
   const handleFinish = () => {
     updateExpertProfile({
       name: name || 'Dr. Suresh Deshmukh',
-      designation: designation || 'Senior Plant Pathologist',
-      institution: institution || 'ICAR - Central Institute for Cotton Research',
+      designation: designation || 'Senior Crop Protection Agronomist',
+      institution: institution || 'Syngenta / ICAR Agricultural Advisory',
+      organizationType: orgType,
       specialty: selectedSpecialties.length > 0 ? selectedSpecialties : ['Cotton Diseases'],
       feeText: feeText || 'Free Basic Guidance',
     });
@@ -66,7 +76,7 @@ export const ExpertRegistrationWalkthrough: React.FC<ExpertRegistrationWalkthrou
           <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
         </TouchableOpacity>
         <Typography variant="h3" color={Colors.textPrimary}>
-          कृषि वैज्ञानिक पंजीयन (Expert Scientist Setup)
+          कृषि विशेषज्ञ पंजीयन (Expert Setup)
         </Typography>
       </View>
 
@@ -88,7 +98,7 @@ export const ExpertRegistrationWalkthrough: React.FC<ExpertRegistrationWalkthrou
             </View>
 
             <Typography variant="h1" color={Colors.textPrimary} style={styles.stepTitle}>
-              आपका नाम व पदनाम (Scientist Identity)
+              आपका नाम व पदनाम (Expert Identity)
             </Typography>
 
             <Typography variant="body" color={Colors.textSecondary} style={styles.stepSub}>
@@ -96,8 +106,8 @@ export const ExpertRegistrationWalkthrough: React.FC<ExpertRegistrationWalkthrou
             </Typography>
 
             <Input
-              label="वैज्ञानिक का पूरा नाम (Full Name):"
-              placeholder="उदा. Dr. Suresh Deshmukh"
+              label="विशेषज्ञ का पूरा नाम (Full Name):"
+              placeholder="उदा. Dr. Suresh Deshmukh या Vikram Joshi"
               value={name}
               onChangeText={setName}
               autoFocus
@@ -105,7 +115,7 @@ export const ExpertRegistrationWalkthrough: React.FC<ExpertRegistrationWalkthrou
 
             <Input
               label="पदनाम (Designation Title):"
-              placeholder="उदा. Senior Plant Pathologist"
+              placeholder="उदा. Senior Crop Agronomist"
               value={designation}
               onChangeText={setDesignation}
             />
@@ -120,7 +130,7 @@ export const ExpertRegistrationWalkthrough: React.FC<ExpertRegistrationWalkthrou
           </View>
         )}
 
-        {/* STEP 2: INSTITUTION & SPECIALTY */}
+        {/* STEP 2: INSTITUTION TYPE & SPECIALTY */}
         {step === 2 && (
           <View style={styles.stepCard}>
             <View style={styles.stepNumberBadge}>
@@ -130,16 +140,45 @@ export const ExpertRegistrationWalkthrough: React.FC<ExpertRegistrationWalkthrou
             </View>
 
             <Typography variant="h1" color={Colors.textPrimary} style={styles.stepTitle}>
-              संस्थान व अनुसंधान क्षेत्र (Institution & Specialty)
+              संस्थान व संगठन प्रकार (Organization Type)
             </Typography>
 
             <Typography variant="body" color={Colors.textSecondary} style={styles.stepSub}>
-              अपनी विशेषज्ञता का चयन करें
+              मुख्य विश्वास मानदंड किसानों द्वारा दिए गए समाधान प्रमाण पर आधारित है
             </Typography>
 
+            <Typography variant="label" style={styles.fieldLabel}>
+              संगठन प्रकार (Organization Category):
+            </Typography>
+            <View style={styles.orgList}>
+              {orgOptions.map((opt) => {
+                const isSel = orgType === opt.key;
+                return (
+                  <TouchableOpacity
+                    key={opt.key}
+                    style={[styles.orgCard, isSel && styles.orgCardSel]}
+                    onPress={() => setOrgType(opt.key)}
+                  >
+                    <Ionicons
+                      name={isSel ? 'radio-button-on' : 'radio-button-off'}
+                      size={20}
+                      color={isSel ? Colors.primary : Colors.textMuted}
+                    />
+                    <Typography
+                      variant="bodyBold"
+                      color={isSel ? Colors.primaryDark : Colors.textPrimary}
+                      style={styles.orgLabelText}
+                    >
+                      {opt.label}
+                    </Typography>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
             <Input
-              label="संस्थान / विश्वविद्यालय (ICAR / KVK Institution):"
-              placeholder="उदा. ICAR - Central Institute for Cotton Research"
+              label="कंपनी / संस्थान का नाम (Company or Institute Name):"
+              placeholder="उदा. Syngenta, Bayer CropScience, or ICAR-CICR"
               value={institution}
               onChangeText={setInstitution}
             />
@@ -268,6 +307,28 @@ const styles = StyleSheet.create({
   fieldLabel: {
     marginBottom: Spacing.xs,
     marginTop: Spacing.sm,
+  },
+  orgList: {
+    gap: Spacing.xs,
+    marginBottom: Spacing.md,
+  },
+  orgCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.surfaceSecondary,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1.5,
+    borderColor: Colors.cardBorder,
+  },
+  orgCardSel: {
+    backgroundColor: Colors.primaryContainer,
+    borderColor: Colors.primary,
+  },
+  orgLabelText: {
+    marginLeft: Spacing.sm,
+    flex: 1,
+    fontSize: 13,
   },
   chipsRow: {
     flexDirection: 'row',

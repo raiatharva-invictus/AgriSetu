@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { Colors, Spacing, BorderRadius } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
 import { useLanguage } from '@/context/LanguageContext';
 import { Typography } from '../ui/Typography';
 import { IconButton } from '../ui/IconButton';
@@ -23,25 +22,28 @@ export const FarmerHeader: React.FC<FarmerHeaderProps> = ({
   onNotificationPress,
   onProfilePress,
 }) => {
-  const router = useRouter();
   const { t, currentLanguageInfo } = useLanguage();
   const [langModalVisible, setLangModalVisible] = useState(false);
 
   return (
     <View style={styles.header}>
       <View style={styles.leftRow}>
-        <Avatar name={farmerName} size={46} isOnline={true} showStatusDot={false} />
+        <TouchableOpacity onPress={onProfilePress} activeOpacity={0.85}>
+          <Avatar name={farmerName} size={46} isOnline={true} showStatusDot={false} />
+        </TouchableOpacity>
+
         <View style={styles.textContainer}>
           <Typography variant="h2" color={Colors.textOnPrimary}>
             {t('greeting')}, {farmerName.split(' ')[0]} 🙏
           </Typography>
+
           <View style={styles.locationRow}>
             <Ionicons name="location-sharp" size={14} color="#A7F3D0" />
             <Typography variant="caption" color="#D1FAE5" style={styles.locationText}>
               {location}
             </Typography>
 
-            {/* Language Selector Pill */}
+            {/* Language Selector Chip */}
             <TouchableOpacity
               style={styles.langChip}
               onPress={() => setLangModalVisible(true)}
@@ -57,16 +59,6 @@ export const FarmerHeader: React.FC<FarmerHeaderProps> = ({
       </View>
 
       <View style={styles.rightActions}>
-        <TouchableOpacity
-          style={styles.expertPortalPill}
-          onPress={() => router.push('/expert-portal')}
-        >
-          <Ionicons name="briefcase" size={14} color={Colors.primaryDark} />
-          <Typography variant="caption" color={Colors.primaryDark} style={styles.portalText}>
-            Expert Mode
-          </Typography>
-        </TouchableOpacity>
-
         <IconButton
           icon={<Ionicons name="notifications-outline" size={22} color={Colors.textOnPrimary} />}
           onPress={onNotificationPress}
@@ -75,7 +67,7 @@ export const FarmerHeader: React.FC<FarmerHeaderProps> = ({
         />
       </View>
 
-      {/* Centralized Language Modal */}
+      {/* Language Modal */}
       <LanguageModal
         visible={langModalVisible}
         onClose={() => setLangModalVisible(false)}
@@ -128,19 +120,5 @@ const styles = StyleSheet.create({
   rightActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
-  },
-  expertPortalPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#A7F3D0',
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 4,
-    borderRadius: BorderRadius.full,
-  },
-  portalText: {
-    fontWeight: '700',
-    fontSize: 11,
-    marginLeft: 4,
   },
 });

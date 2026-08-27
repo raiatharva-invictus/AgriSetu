@@ -14,11 +14,32 @@ export interface FarmerProfile {
   avatarUrl?: string;
 }
 
+export interface VerifiedFarmerResolution {
+  id: string;
+  caseTitle: string;
+  cropName: string;
+  farmerName: string;
+  village: string;
+  district: string;
+  recoveryDays: string; // e.g., "4 days"
+  farmerFeedback: string;
+  approvedAtDate: string;
+  isFarmerApproved: boolean;
+  expertName: string;
+}
+
+export type OrganizationType = 
+  | 'icar_kvk'
+  | 'private_company'
+  | 'independent_agronomist'
+  | 'krishi_officer';
+
 export interface AgriculturalExpert {
   id: string;
   name: string;
-  designation: string; // e.g., "Senior Agronomist, KVK Nagpur"
-  institution: string; // e.g., "ICAR - Central Institute for Cotton Research"
+  designation: string; // e.g., "Senior Crop Pathologist", "Lead Field Agronomist"
+  institution: string; // e.g., "ICAR - CICR", "Syngenta India", "Bayer CropScience", "Independent"
+  organizationType: OrganizationType;
   specialty: string[]; // e.g., ["Crop Diseases", "Cotton Specialist", "Soil Fertility"]
   experienceYears: number;
   languages: string[];
@@ -28,6 +49,10 @@ export interface AgriculturalExpert {
   avatarUrl?: string;
   feeText: string; // e.g. "Free Basic Guidance" or "₹199 / 20 mins"
   
+  // Primary Trust Metric: Farmer-Approved Proof of Work
+  verifiedResolutionsCount?: number;
+  verifiedResolutions?: VerifiedFarmerResolution[];
+
   // Relevance fields for Expert Matching Screen
   matchPercentage?: number; // e.g. 98
   relevantCaseCount?: number; // e.g. 34
@@ -72,6 +97,7 @@ export interface CropCase {
   createdAt: string;
   updatedAt: string;
   solutionNote?: string;
+  farmerApprovedResolution?: VerifiedFarmerResolution;
 }
 
 export interface SeasonalTip {

@@ -7,12 +7,13 @@
 6 silly config load:file:C:\Users\admin\AppData\Roaming\npm\etc\npmrc
 7 verbose title npm exec tsc --noEmit
 8 verbose argv "exec" "--" "tsc" "--noEmit"
-9 verbose logfile logs-max:10 dir:D:\Hackathons\Jynex\AgriSetu\.npm-cache\_logs\2026-08-27T05_01_14_790Z-
-10 verbose logfile D:\Hackathons\Jynex\AgriSetu\.npm-cache\_logs\2026-08-27T05_01_14_790Z-debug-0.log
-11 silly logfile done cleaning log files
-12 verbose cwd D:\Hackathons\Jynex\AgriSetu
-13 verbose os Windows_NT 10.0.26200
-14 verbose node v24.11.1
-15 verbose npm  v11.6.4
-16 verbose exit 2
-17 verbose code 2
+9 verbose logfile logs-max:10 dir:D:\Hackathons\Jynex\AgriSetu\.npm-cache\_logs\2026-08-27T05_37_29_121Z-
+10 verbose logfile D:\Hackathons\Jynex\AgriSetu\.npm-cache\_logs\2026-08-27T05_37_29_121Z-debug-0.log
+11 silly logfile start cleaning logs, removing 1 files
+12 silly logfile done cleaning log files
+13 verbose cwd D:\Hackathons\Jynex\AgriSetu
+14 verbose os Windows_NT 10.0.26200
+15 verbose node v24.11.1
+16 verbose npm  v11.6.4
+17 verbose exit 0
+18 info ok
