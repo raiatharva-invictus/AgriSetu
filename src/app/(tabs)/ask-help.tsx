@@ -76,7 +76,7 @@ export default function AskHelpScreen() {
     try {
       // 1. Insert case into Supabase backend
       const createdCase = await caseService.createCase({
-        farmer_id: '11111111-1111-1111-1111-111111111111',
+        farmer_id: session?.farmerProfile?.id || '11111111-1111-1111-1111-111111111111',
         crop: selectedCrop,
         title: interpretation.problemSummary,
         description: descriptionText,
