@@ -88,17 +88,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // LIVE SUPABASE CLOUD DATABASE SYNC
     try {
+      let activeUser = await authService.getCurrentUser();
+      let realUserId = activeUser?.id;
+
+      if (!realUserId) {
+        const cleanPhone = (phone || '9876543210').replace(/\D/g, '');
+        const autoEmail = `farmer_${cleanPhone || Date.now()}@agrisetu.app`;
+        const autoPass = 'AgriSetuAuth2026!';
+
+        const { data: authData } = await supabase.auth.signUp({
+          email: autoEmail,
+          password: autoPass,
+        });
+
+        if (authData?.user) {
+          realUserId = authData.user.id;
+        } else {
+          const { data: signInData } = await supabase.auth.signInWithPassword({
+            email: autoEmail,
+            password: autoPass,
+          });
+          realUserId = signInData?.user?.id;
+        }
+      }
+
+      const finalUserId = realUserId || userId;
+
       await authService.createProfile({
-        id: userId,
+        id: finalUserId,
         role: userRole,
-        full_name: fullName || 'AgriSetu User',
+        full_name: fullName || 'AgriSetu Farmer',
         phone: phone || '+91 98765 43210',
         preferred_language: lang,
         state: state || 'Maharashtra',
-        district: district || 'Nagpur',
-        village: village || 'Center',
+        district: district || 'Nashik',
+        village: village || 'Nashik',
       });
-      console.log('✓ Live Supabase user profile created successfully:', userId);
+      console.log('✓ Live Supabase user profile created successfully:', finalUserId);
     } catch (e: any) {
       console.warn('Live Supabase sync note:', e.message || e);
     }
