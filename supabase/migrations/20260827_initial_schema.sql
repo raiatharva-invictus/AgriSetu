@@ -168,10 +168,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_profiles_modtime ON public.profiles;
 CREATE TRIGGER update_profiles_modtime BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
+
+DROP TRIGGER IF EXISTS update_expert_profiles_modtime ON public.expert_profiles;
 CREATE TRIGGER update_expert_profiles_modtime BEFORE UPDATE ON public.expert_profiles FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
+
+DROP TRIGGER IF EXISTS update_cases_modtime ON public.cases;
 CREATE TRIGGER update_cases_modtime BEFORE UPDATE ON public.cases FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
+
+DROP TRIGGER IF EXISTS update_consultations_modtime ON public.consultations;
 CREATE TRIGGER update_consultations_modtime BEFORE UPDATE ON public.consultations FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
+
+DROP TRIGGER IF EXISTS update_free_tips_modtime ON public.free_tips;
 CREATE TRIGGER update_free_tips_modtime BEFORE UPDATE ON public.free_tips FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
 
 -- ============================================================================
@@ -189,22 +198,40 @@ ALTER TABLE public.tip_categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.free_tips ENABLE ROW LEVEL SECURITY;
 
 -- 1. Profiles Policies
+DROP POLICY IF EXISTS "Public profiles are readable by authenticated users" ON public.profiles;
 CREATE POLICY "Public profiles are readable by authenticated users" ON public.profiles FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
 CREATE POLICY "Users can insert their own profile" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- 2. Expert Profiles Policies
+DROP POLICY IF EXISTS "Expert profiles are publicly readable" ON public.expert_profiles;
 CREATE POLICY "Expert profiles are publicly readable" ON public.expert_profiles FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Experts can update their own expert profile" ON public.expert_profiles;
 CREATE POLICY "Experts can update their own expert profile" ON public.expert_profiles FOR UPDATE USING (auth.uid() = user_id);
 
 -- 3. Specializations Policies
+DROP POLICY IF EXISTS "Specializations readable by all" ON public.specializations;
 CREATE POLICY "Specializations readable by all" ON public.specializations FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Expert specializations readable by all" ON public.expert_specializations;
 CREATE POLICY "Expert specializations readable by all" ON public.expert_specializations FOR SELECT USING (true);
 
 -- 4. Cases Policies
+DROP POLICY IF EXISTS "Farmers can read their own cases" ON public.cases;
 CREATE POLICY "Farmers can read their own cases" ON public.cases FOR SELECT USING (auth.uid() = farmer_id);
+
+DROP POLICY IF EXISTS "Farmers can create cases" ON public.cases;
 CREATE POLICY "Farmers can create cases" ON public.cases FOR INSERT WITH CHECK (auth.uid() = farmer_id);
+
+DROP POLICY IF EXISTS "Farmers can update their own cases" ON public.cases;
 CREATE POLICY "Farmers can update their own cases" ON public.cases FOR UPDATE USING (auth.uid() = farmer_id);
+
+DROP POLICY IF EXISTS "Assigned experts can read cases" ON public.cases;
 CREATE POLICY "Assigned experts can read cases" ON public.cases FOR SELECT USING (
   EXISTS (
     SELECT 1 FROM public.expert_profiles ep WHERE ep.id = cases.expert_id AND ep.user_id = auth.uid()
@@ -212,25 +239,37 @@ CREATE POLICY "Assigned experts can read cases" ON public.cases FOR SELECT USING
 );
 
 -- 5. Case Images Policies
+DROP POLICY IF EXISTS "Farmers can read their case images" ON public.case_images;
 CREATE POLICY "Farmers can read their case images" ON public.case_images FOR SELECT USING (
   EXISTS (SELECT 1 FROM public.cases c WHERE c.id = case_images.case_id AND c.farmer_id = auth.uid())
 );
+
+DROP POLICY IF EXISTS "Farmers can insert case images" ON public.case_images;
 CREATE POLICY "Farmers can insert case images" ON public.case_images FOR INSERT WITH CHECK (
   EXISTS (SELECT 1 FROM public.cases c WHERE c.id = case_images.case_id AND c.farmer_id = auth.uid())
 );
 
 -- 6. Consultations Policies
+DROP POLICY IF EXISTS "Farmers can read their consultations" ON public.consultations;
 CREATE POLICY "Farmers can read their consultations" ON public.consultations FOR SELECT USING (auth.uid() = farmer_id);
+
+DROP POLICY IF EXISTS "Experts can read their consultations" ON public.consultations;
 CREATE POLICY "Experts can read their consultations" ON public.consultations FOR SELECT USING (
   EXISTS (SELECT 1 FROM public.expert_profiles ep WHERE ep.id = consultations.expert_id AND ep.user_id = auth.uid())
 );
 
 -- 7. Reviews Policies
+DROP POLICY IF EXISTS "Reviews are publicly readable for expert trust scoring" ON public.reviews;
 CREATE POLICY "Reviews are publicly readable for expert trust scoring" ON public.reviews FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Farmers can insert reviews for their consultations" ON public.reviews;
 CREATE POLICY "Farmers can insert reviews for their consultations" ON public.reviews FOR INSERT WITH CHECK (auth.uid() = farmer_id);
 
 -- 8. Tips Policies
+DROP POLICY IF EXISTS "Tip categories readable by all" ON public.tip_categories;
 CREATE POLICY "Tip categories readable by all" ON public.tip_categories FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Free tips readable by all" ON public.free_tips;
 CREATE POLICY "Free tips readable by all" ON public.free_tips FOR SELECT USING (true);
 
 -- ============================================================================
@@ -240,10 +279,12 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('case-images', 'case-images', false)
 ON CONFLICT (id) DO NOTHING;
 
+DROP POLICY IF EXISTS "Farmers can upload images to case-images bucket" ON storage.objects;
 CREATE POLICY "Farmers can upload images to case-images bucket" ON storage.objects FOR INSERT WITH CHECK (
   bucket_id = 'case-images' AND auth.uid() IS NOT NULL
 );
 
+DROP POLICY IF EXISTS "Authenticated users can view case-images" ON storage.objects;
 CREATE POLICY "Authenticated users can view case-images" ON storage.objects FOR SELECT USING (
   bucket_id = 'case-images' AND auth.uid() IS NOT NULL
 );
