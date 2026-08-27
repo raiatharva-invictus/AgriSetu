@@ -5,10 +5,10 @@
 4 silly config load:file:D:\Hackathons\Jynex\AgriSetu\.npmrc
 5 silly config load:file:C:\Users\admin\.npmrc
 6 silly config load:file:C:\Users\admin\AppData\Roaming\npm\etc\npmrc
-7 verbose title npm exec expo run:android
-8 verbose argv "exec" "--" "expo" "run:android"
-9 verbose logfile logs-max:10 dir:D:\Hackathons\Jynex\AgriSetu\.npm-cache\_logs\2026-08-27T09_00_04_761Z-
-10 verbose logfile D:\Hackathons\Jynex\AgriSetu\.npm-cache\_logs\2026-08-27T09_00_04_761Z-debug-0.log
+7 verbose title npm run test:android
+8 verbose argv "run" "test:android"
+9 verbose logfile logs-max:10 dir:D:\Hackathons\Jynex\AgriSetu\.npm-cache\_logs\2026-08-27T11_38_14_314Z-
+10 verbose logfile D:\Hackathons\Jynex\AgriSetu\.npm-cache\_logs\2026-08-27T11_38_14_314Z-debug-0.log
 11 silly logfile start cleaning logs, removing 1 files
 12 silly logfile done cleaning log files
 13 verbose cwd D:\Hackathons\Jynex\AgriSetu

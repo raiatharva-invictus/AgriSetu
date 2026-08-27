@@ -8,6 +8,10 @@ export interface AgriculturalCaseDraft {
   confidence: number; // Structuring/interpretation step confidence (0.0 to 1.0)
   rawTranscript?: string;
   photoAttached?: boolean;
+  isLiveProvider?: boolean;
+  provider?: string;
+  modelUsed?: string;
+  additionalQuestions?: string[];
 }
 
 export class ProblemUnderstandingService {
@@ -17,7 +21,7 @@ export class ProblemUnderstandingService {
     userLocation: string = 'Nashik',
     photoAttached: boolean = false
   ): Promise<AgriculturalCaseDraft> {
-    await new Promise((r) => setTimeout(r, 700));
+    await new Promise((r) => setTimeout(r, 600));
 
     const lower = rawText.toLowerCase();
 
@@ -43,7 +47,7 @@ export class ProblemUnderstandingService {
     if (lower.includes('curl') || lower.includes('मुड़') || lower.includes('কোঁকড়ে')) {
       symptoms.push('Leaf Curling');
     }
-    if (lower.includes('insect') || lower.includes('कीड़े') || lower.includes('পোকা') || lower.includes('pest')) {
+    if (lower.includes('insect') || lower.includes('कीड़े') || lower.includes('পোका') || lower.includes('pest')) {
       symptoms.push('Visible Pest Infestation');
     }
     if (lower.includes('spot') || lower.includes('धब्बे') || lower.includes('দাগ')) {
@@ -67,6 +71,10 @@ export class ProblemUnderstandingService {
       confidence: 0.88,
       rawTranscript: rawText,
       photoAttached,
+      isLiveProvider: false,
+      provider: 'gemini',
+      modelUsed: 'gemini-2.5-flash',
+      additionalQuestions: ['Are the insect spots located on the underside of the leaves?'],
     };
   }
 }
