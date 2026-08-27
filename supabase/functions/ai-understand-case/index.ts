@@ -16,13 +16,18 @@ serve(async (req) => {
 
     if (!apiKey) {
       return new Response(
-        JSON.stringify({ error: 'GEMINI_API_KEY secret is not set in Supabase Vault.' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        JSON.stringify({ status: 'error', message: 'GEMINI_API_KEY secret is missing in Supabase Vault.' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
       );
     }
 
-    const geminiModel = model || 'gemini-2.5-flash';
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
+    // Recommended Flash models according to Google API
+    const modelsToTry = [
+      'gemini-3.6-flash',
+      'gemini-3.5-flash',
+      'gemini-flash-latest',
+      model || 'gemini-2.5-flash',
+    ];
 
     const prompt = `You are an expert agricultural AI assistant for Indian farmers.
 Structure the following farmer query into strict JSON:
@@ -32,36 +37,58 @@ Location: "${location || 'Nashik'}"
 
 Respond ONLY with valid JSON in this format:
 {
-  "crop": "<Crop Name e.g. Tomato, Cotton, Wheat, Rice, Chilli>",
-  "problemCategory": "<Category e.g. Plant Pathology & Pest Control, Soil Science, Irrigation>",
-  "symptoms": ["<Symptom 1>", "<Symptom 2>"],
-  "environmentFactors": ["<Factor 1>", "<Factor 2>"],
-  "location": "<Location>",
-  "urgency": "<Normal or High>",
-  "confidence": 0.92,
-  "additionalQuestions": ["<Clarifying Question>"]
+  "crop": "Tomato",
+  "problemCategory": "Plant Pathology & Pest Control",
+  "symptoms": ["Leaf Curling", "Visible Pest Infestation"],
+  "environmentFactors": ["High Temperature", "Humidity / Recent Rainfall"],
+  "location": "${location || 'Nashik'}",
+  "urgency": "Normal",
+  "confidence": 0.95,
+  "additionalQuestions": ["Are insect spots visible on leaf undersides?"]
 }`;
 
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { response_mime_type: 'application/json' },
-      }),
-    });
+    let lastError = null;
 
-    const data = await res.json();
-    let jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-    const parsed = JSON.parse(jsonText);
+    for (const geminiModel of modelsToTry) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
 
-    return new Response(JSON.stringify(parsed), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+          }),
+        });
+
+        const data = await res.json();
+        if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+          let jsonText = data.candidates[0].content.parts[0].text;
+          jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
+          const parsed = JSON.parse(jsonText);
+          parsed.modelUsed = geminiModel;
+          parsed.isLiveProvider = true;
+
+          return new Response(JSON.stringify(parsed), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+          });
+        } else {
+          lastError = { geminiModel, status: res.status, data };
+        }
+      } catch (e) {
+        lastError = { geminiModel, error: e.message };
+      }
+    }
+
+    return new Response(
+      JSON.stringify({ status: 'gemini_error', details: lastError }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+    );
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ status: 'exception', message: err.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
+      status: 200,
     });
   }
 });

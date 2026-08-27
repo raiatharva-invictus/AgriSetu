@@ -45,3 +45,10 @@ example
 # generated native folders
 /ios
 /android
+
+# local caches & scratch test files
+.npm-cache/
+scratch/
+scripts/
+.temp/
+
