@@ -1,0 +1,88 @@
+import { LocaleKeys } from './en';
+
+export const hi: Record<LocaleKeys, string> = {
+  appName: 'कृषिसेतु',
+  greeting: 'नमस्ते',
+  languageName: 'हिन्दी',
+  
+  // Home Screen
+  cropHelpHeroEyebrow: 'फसल सुरक्षा व सलाह (2 सेकंड में)',
+  cropHelpHeroTitle: 'खेत में कोई परेशानी है?',
+  cropHelpHeroSub: 'कृषि वैज्ञानिकों से निःशुल्क सलाह पाने के लिए बोलें या फोटो खींचें',
+  speakProblem: 'बोलकर पूछें',
+  takeLeafPhoto: 'फोटो खींचें',
+  activeQueryTitle: 'आपकी सक्रिय समस्याएं',
+  activeQuerySub: 'कृषि वैज्ञानिक द्वारा समीक्षा जारी',
+  viewAll: 'सभी देखें',
+  fieldAdvisoryTitle: 'आज की खेत सलाह',
+  mandiRatesTitle: 'मंडी आज का भाव',
+  mandiRatesSub: 'नागपुर व आस-पास की मंडियां',
+  availableExpertsTitle: 'उपलब्ध कृषि विशेषज्ञ',
+  availableExpertsSub: 'ICAR व कृषि विश्वविद्यालय के प्रमाणित वैज्ञानिक',
+  seasonalAdviceTitle: 'मौसमी खेती टिप्स',
+  seasonalAdviceSub: 'फसल चक्र व जैविक खेती के उपाय',
+
+  // Ask Help Flow
+  whatIsHappeningTitle: 'आपके खेत में क्या समस्या है?',
+  whatIsHappeningSub: 'बोलकर, फोटो खींचकर, या टाइप करके बताएं।',
+  speakTitle: '1. अपनी भाषा में बोलें',
+  speakSub: 'माइक बटन दबाएं और फसल की समस्या बोलकर बताएं',
+  tapToSpeak: 'बोलने के लिए दबाएं',
+  listening: 'रिकॉर्डिंग जारी है...',
+  reRecord: 'फिर से बोलें',
+  voiceTranscript: 'आपके द्वारा बोली गई बात:',
+  photoTitle: '2. फसल की फोटो',
+  photoSub: 'प्रभावित पत्ते या पौधे की फोटो खींचें',
+  typeTitle: '3. टाइप करके लिखें',
+  typePlaceholder: 'उदा. कपास के पत्तों पर पीलापन आ रहा है...',
+  optionalDetails: 'अतिरिक्त विवरण (ऐच्छिक)',
+  selectCrop: 'फसल चुनें:',
+  urgencyLevel: 'प्राथमिकता / आपातकाल:',
+  normalUrgency: 'सामान्य (24 घंटे में जवाब)',
+  urgentUrgency: 'अति आवश्यक (त्वरित वैज्ञानिक कॉल)',
+  continueToReview: 'आगे बढ़ें (विवरण जांचें)',
+
+  // Review Screen
+  reviewTitle: 'आपकी समस्या समझ आ गई है',
+  reviewSub: 'हमने आपकी बात का विश्लेषण कृषि वैज्ञानिकों से मिलाने के लिए किया है।',
+  crop: 'फसल',
+  noticedIssue: 'क्या देखा गया',
+  symptoms: 'मुख्य लक्षण',
+  categoryArea: 'विभाग',
+  region: 'क्षेत्र',
+  urgency: 'प्राथमिकता',
+  humanTrustNotice: 'यह जानकारी सीधे आईसीएआर व कृषि विज्ञान केंद्र के वैज्ञानिकों को भेजी जाएगी।',
+  isThisCorrect: 'क्या यह जानकारी सही है?',
+  yesFindExpert: 'हाँ, कृषि विशेषज्ञ खोजें',
+  editInfo: 'सुधार करें',
+
+  // Expert Match
+  foundExpertsTitle: 'आपकी समस्या के लिए {count} कृषि विशेषज्ञ मिले',
+  foundExpertsSub: 'आपकी कपास रोग की समस्या के लिए सबसे उपयुक्त विशेषज्ञ',
+  whyThisExpert: 'यह विशेषज्ञ क्यों उपयुक्त हैं?',
+  consultationFee: 'सलाह शुल्क',
+  availableNow: 'आज उपलब्ध',
+  offline: 'ऑफ़लाइन',
+  viewProfile: 'प्रोफाइल देखें',
+  bookConsultation: 'बातचीत करें',
+
+  // Free Tips
+  usefulAdviceTitle: 'उपयोगी सलाह, आपके लिए निःशुल्क',
+  usefulAdviceSub: 'व्यावहारिक कृषि ज्ञान जिसे 30 सेकंड में पढ़ा जा सकता है।',
+  checkpointsTitle: 'त्वरित जांच सूची (30 सेकंड):',
+  readFullGuide: 'पूरा विवरण पढ़ें',
+  showLess: 'कम दिखाएं',
+  stillNeedHelp: 'क्या आपको अभी भी सहायता चाहिए?',
+  stillNeedHelpSub: 'फसल की गंभीर बीमारी या कीट प्रकोप के लिए कृषि वैज्ञानिकों से सीधा परामर्श लें।',
+  findAnExpertBtn: 'कृषि विशेषज्ञ से बात करें',
+
+  // Expert Portal
+  expertPortalTitle: 'कृषिसेतु विशेषज्ञ प्रबंधन पोर्टल',
+  todaysRequests: 'आज के नए अनुरोध',
+  upcomingCalls: 'आगामी कॉल',
+  farmersHelped: 'किसानों की मदद की',
+  reportedResolution: 'रिपोर्ट किया समाधान',
+  newRequestsTitle: 'नए परामर्श अनुरोध',
+  acceptRequest: 'स्वीकार करें',
+  declineRequest: 'अस्वीकार',
+};
