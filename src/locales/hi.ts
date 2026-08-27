@@ -2,9 +2,55 @@ import { LocaleKeys } from './en';
 
 export const hi: Record<LocaleKeys, string> = {
   appName: 'कृषिसेतु',
+  splashTagline: 'सही कृषि सलाह, जब आपको ज़रूरत हो।',
   greeting: 'नमस्ते',
   languageName: 'हिन्दी',
   
+  // First Time Language Selection
+  chooseLanguageTitle: 'अपनी भाषा चुनें',
+  chooseLanguageSub: 'आप इसे बाद में अपनी प्रोफाइल से बदल सकते हैं।',
+  continueBtn: 'आगे बढ़ें',
+
+  // Role Selection
+  howWillYouUseTitle: 'आप कृषिसेतु का उपयोग कैसे करेंगे?',
+  farmerPathTitle: 'मैं किसान हूँ',
+  farmerPathSub: 'अपने खेत के लिए व्यावहारिक सलाह पाएं और सही कृषि विशेषज्ञ से जुड़ें।',
+  expertPathTitle: 'मैं कृषि विशेषज्ञ हूँ',
+  expertPathSub: 'अपनी विशेषज्ञता साझा करें, किसानों की मदद करें और अपनी प्रोफाइल बनाएं।',
+
+  // Farmer Onboarding
+  farmerStep1Title: 'आइए आपके बारे में जानें',
+  fullNameLabel: 'आपका पूरा नाम',
+  phoneNumberLabel: 'फ़ोन नंबर',
+  farmerStep2Title: 'आप कहाँ खेती करते हैं?',
+  stateLabel: 'राज्य',
+  districtLabel: 'ज़िला',
+  villageLabel: 'गाँव / ब्लॉक (ऐच्छिक)',
+  farmerStep3Title: 'आप क्या उगाते हैं?',
+  selectCropsSub: 'अपनी मुख्य फसलों का चयन करें',
+  farmerFinishTitle: 'आपकी प्रोफाइल तैयार है।',
+  continueToAgriSetu: 'कृषिसेतु शुरू करें',
+
+  // Expert Onboarding
+  expertStep1Title: 'अपनी व्यावसायिक प्रोफाइल बनाएं',
+  professionalTitleLabel: 'पदनाम / पद',
+  expertStep2Title: 'आपकी मुख्य विशेषज्ञता क्या है?',
+  expertStep3Title: 'किसानों को अपने अनुभव के बारे में बताएं',
+  yearsExpLabel: 'अनुभव (वर्ष)',
+  regionsServedLabel: 'कार्य क्षेत्र / ज़िले',
+  shortBioLabel: 'संक्षिप्त विवरण',
+  expertStep4Title: 'सलाह व परामर्श दर चुनें',
+  priceLabel: 'परामर्श शुल्क',
+  durationLabel: 'अवधि',
+  availabilityLabel: 'उपलब्धता',
+  createProfileBtn: 'प्रोफाइल बनाएं व शुरू करें',
+
+  // Common UI
+  nextBtn: 'आगे बढ़ें',
+  backBtn: 'पीछे',
+  stepOf: 'चरण {current} / {total}',
+  optional: 'ऐच्छिक',
+
   // Home Screen
   cropHelpHeroEyebrow: 'फसल सुरक्षा व सलाह (2 सेकंड में)',
   cropHelpHeroTitle: 'खेत में कोई परेशानी है?',

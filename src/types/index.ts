@@ -1,3 +1,5 @@
+export type UserRole = 'farmer' | 'expert';
+
 export type CaseStatus = 'pending' | 'under_review' | 'resolved' | 'urgent';
 
 export interface FarmerProfile {

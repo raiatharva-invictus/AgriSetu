@@ -2,9 +2,55 @@ import { LocaleKeys } from './en';
 
 export const bn: Record<LocaleKeys, string> = {
   appName: 'কৃষি সেতু',
+  splashTagline: 'সঠিক সময় সঠিক কৃষি পরামর্শ।',
   greeting: 'নমস্কার',
   languageName: 'বাংলা',
   
+  // First Time Language Selection
+  chooseLanguageTitle: 'আপনার ভাষা নির্বাচন করুন',
+  chooseLanguageSub: 'আপনি এটি পরে আপনার প্রোফাইল থেকে পরিবর্তন করতে পারেন।',
+  continueBtn: 'এগিয়ে যান',
+
+  // Role Selection
+  howWillYouUseTitle: 'আপনি কীভাবে কৃষি সেতু ব্যবহার করবেন?',
+  farmerPathTitle: 'আমি একজন কৃষক',
+  farmerPathSub: 'আপনার খামারের জন্য বাস্তবসম্মত পরামর্শ পান এবং সঠিক বিশেষজ্ঞদের সাথে যুক্ত হন।',
+  expertPathTitle: 'আমি একজন কৃষি বিশেষজ্ঞ',
+  expertPathSub: 'আপনার অভিজ্ঞতা ভাগ করুন, কৃষকদের সাহায্য করুন এবং পেশাদার প্রোফাইল তৈরি করুন।',
+
+  // Farmer Onboarding
+  farmerStep1Title: 'আপনার সাথে পরিচিত হওয়া যাক',
+  fullNameLabel: 'আপনার পুরো নাম',
+  phoneNumberLabel: 'ফোন নম্বর',
+  farmerStep2Title: 'আপনার খামার কোথায় অবস্থিত?',
+  stateLabel: 'রাজ্য',
+  districtLabel: 'জেলা',
+  villageLabel: 'গ্রাম / ব্লক (ঐচ্ছিক)',
+  farmerStep3Title: 'আপনি কী কী চাষ করেন?',
+  selectCropsSub: 'আপনার প্রধান ফসলগুলি নির্বাচন করুন',
+  farmerFinishTitle: 'আপনার প্রোফাইল প্রস্তুত।',
+  continueToAgriSetu: 'কৃষি সেতু শুরু করুন',
+
+  // Expert Onboarding
+  expertStep1Title: 'আপনার পেশাদার প্রোফাইল তৈরি করুন',
+  professionalTitleLabel: 'পদবি',
+  expertStep2Title: 'আপনার প্রধান দক্ষতা কী?',
+  expertStep3Title: 'কৃষকদের আপনার অভিজ্ঞতার কথা বলুন',
+  yearsExpLabel: 'অভিজ্ঞতা (বছর)',
+  regionsServedLabel: 'কর্মক্ষেত্র / জেলা',
+  shortBioLabel: 'সংক্ষিপ্ত বিবরণ',
+  expertStep4Title: 'পরামর্শ ফি নির্বাচন করুন',
+  priceLabel: 'পরামর্শ ফি',
+  durationLabel: 'সময়কাল',
+  availabilityLabel: 'উপলব্ধতা',
+  createProfileBtn: 'প্রোফাইল তৈরি করে শুরু করুন',
+
+  // Common UI
+  nextBtn: 'পরবর্তী',
+  backBtn: 'পিছনে',
+  stepOf: 'ধাপ {current} / {total}',
+  optional: 'ঐচ্ছিক',
+
   // Home Screen
   cropHelpHeroEyebrow: 'ফসল সুরক্ষা ও পরামর্শ (২ সেকেন্ডে)',
   cropHelpHeroTitle: 'আপনার ক্ষেতে কি কোনো সমস্যা আছে?',

@@ -3,6 +3,7 @@ import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, BorderRadius, Spacing, TouchTargets } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Typography } from '../ui/Typography';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
@@ -18,6 +19,7 @@ export const FarmerRegistrationWalkthrough: React.FC<FarmerRegistrationWalkthrou
   onBackToSplash,
 }) => {
   const { farmerProfile, updateFarmerProfile, completeOnboarding } = useAuth();
+  const { language } = useLanguage();
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   const [name, setName] = useState(farmerProfile.name);
@@ -45,7 +47,7 @@ export const FarmerRegistrationWalkthrough: React.FC<FarmerRegistrationWalkthrou
     }
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     updateFarmerProfile({
       name: name || 'Rameshwar Patel',
       village: village || 'Kalmeshwar',
@@ -53,7 +55,7 @@ export const FarmerRegistrationWalkthrough: React.FC<FarmerRegistrationWalkthrou
       preferredLanguage: selectedLanguage,
       primaryCrops: selectedCrops.length > 0 ? selectedCrops : ['Cotton (कपास)'],
     });
-    completeOnboarding();
+    await completeOnboarding(language);
     onComplete();
   };
 

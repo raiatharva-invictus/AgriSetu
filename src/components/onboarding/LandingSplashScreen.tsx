@@ -2,9 +2,10 @@ import React from 'react';
 import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors, BorderRadius, Spacing, Shadows } from '@/constants/theme';
-import { useAuth, UserRole } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { LanguageCode } from '@/locales';
+import { UserRole } from '@/types';
 import { Typography } from '../ui/Typography';
 
 interface LandingSplashScreenProps {
@@ -163,7 +164,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollContent: {
-    paddingBottom: Spacing.xxxl,
+    paddingBottom: Spacing.xxl,
   },
   topLanguageSection: {
     backgroundColor: Colors.primaryDark,

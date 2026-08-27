@@ -1,8 +1,54 @@
 export const en = {
   appName: 'AgriSetu',
+  splashTagline: 'The right agricultural expertise, when you need it.',
   greeting: 'Namaste',
   languageName: 'English',
   
+  // First Time Language Selection
+  chooseLanguageTitle: 'Choose your language',
+  chooseLanguageSub: 'You can change this later from your profile.',
+  continueBtn: 'Continue',
+
+  // Role Selection
+  howWillYouUseTitle: 'How will you use AgriSetu?',
+  farmerPathTitle: "I'm a Farmer",
+  farmerPathSub: 'Get practical help for your farm and connect with the right expert.',
+  expertPathTitle: "I'm an Agricultural Expert",
+  expertPathSub: 'Share your expertise, help farmers, and build your professional profile.',
+
+  // Farmer Onboarding
+  farmerStep1Title: "Let's get to know you",
+  fullNameLabel: 'Full name',
+  phoneNumberLabel: 'Phone number',
+  farmerStep2Title: 'Where do you farm?',
+  stateLabel: 'State',
+  districtLabel: 'District',
+  villageLabel: 'Village / Block (Optional)',
+  farmerStep3Title: 'What do you grow?',
+  selectCropsSub: 'Select all crops you grow in your fields',
+  farmerFinishTitle: "You're all set.",
+  continueToAgriSetu: 'Continue to AgriSetu',
+
+  // Expert Onboarding
+  expertStep1Title: 'Build your professional profile',
+  professionalTitleLabel: 'Professional title',
+  expertStep2Title: 'What do you specialize in?',
+  expertStep3Title: 'Tell farmers about your experience',
+  yearsExpLabel: 'Years of experience',
+  regionsServedLabel: 'Regions served',
+  shortBioLabel: 'Short bio',
+  expertStep4Title: 'Set your consultation',
+  priceLabel: 'Consultation price',
+  durationLabel: 'Duration',
+  availabilityLabel: 'Availability',
+  createProfileBtn: 'Create my professional profile',
+
+  // Common UI
+  nextBtn: 'Next',
+  backBtn: 'Back',
+  stepOf: 'Step {current} of {total}',
+  optional: 'Optional',
+
   // Home Screen
   cropHelpHeroEyebrow: 'CROP HELP IN 2 SECONDS',
   cropHelpHeroTitle: 'Facing a crop issue?',

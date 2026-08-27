@@ -2,9 +2,55 @@ import { LocaleKeys } from './en';
 
 export const as: Record<LocaleKeys, string> = {
   appName: 'কৃষি সেতু',
+  splashTagline: 'সঠিক সময়ত সঠিক কৃষি পৰামৰ্শ।',
   greeting: 'নমস্কাৰ',
   languageName: 'অসমীয়া',
   
+  // First Time Language Selection
+  chooseLanguageTitle: 'আপোনাৰ ভাষা বাছনি কৰক',
+  chooseLanguageSub: 'আপুনি পাছত আপোনাৰ প্ৰফাইলৰ পৰা ইয়াক সলনি কৰিব পাৰিব।',
+  continueBtn: 'আগবাঢ়ক',
+
+  // Role Selection
+  howWillYouUseTitle: 'আপুনি কৃষি সেতু কেনেকৈ ব্যৱহাৰ কৰিব?',
+  farmerPathTitle: 'মই এজন কৃষক',
+  farmerPathSub: 'আপোনাৰ পথাৰৰ বাবে ব্যৱহাৰিক সহায় পাওক আৰু সঠিক বিশেষজ্ঞৰ সৈতে সংযোগ কৰক।',
+  expertPathTitle: 'মই এজন কৃষি বিশেষজ্ঞ',
+  expertPathSub: 'আপোনাৰ অভিজ্ঞতা ভাগ-বাটোৱাৰা কৰক, কৃষকক সহায় কৰক আৰু প্ৰফাইল বনাওক।',
+
+  // Farmer Onboarding
+  farmerStep1Title: 'আপোনাৰ বিষয়ে জানো আহক',
+  fullNameLabel: 'আপোনাৰ সম্পূৰ্ণ নাম',
+  phoneNumberLabel: 'ফোন নম্বৰ',
+  farmerStep2Title: 'আপোনাৰ খেতি পথাৰ ক’ত?',
+  stateLabel: 'ৰাজ্য',
+  districtLabel: 'জিলা',
+  villageLabel: 'গাঁৱ / ব্লক (ঐচ্ছিক)',
+  farmerStep3Title: 'আপুনি কি কি খেতি কৰে?',
+  selectCropsSub: 'আপোনাৰ মুখ্য শস্যসমূহ বাছনি কৰক',
+  farmerFinishTitle: 'আপোনাৰ প্ৰফাইল প্ৰস্তুত।',
+  continueToAgriSetu: 'কৃষি সেতু আৰম্ভ কৰক',
+
+  // Expert Onboarding
+  expertStep1Title: 'আপোনাৰ পেছাদাৰী প্ৰফাইল বনাওক',
+  professionalTitleLabel: 'পদৱী',
+  expertStep2Title: 'আপোনাৰ মুখ্য বিশেষজ্ঞতা কি?',
+  expertStep3Title: 'কৃষকসকলক আপোনাৰ অভিজ্ঞতাৰ বিষয়ে কওক',
+  yearsExpLabel: 'অভিজ্ঞতা (বছৰ)',
+  regionsServedLabel: 'কাৰ্যক্ষেত্ৰ / জিলা',
+  shortBioLabel: 'চমু বিৱৰণ',
+  expertStep4Title: 'পৰামৰ্শ মাচুল বাছনি কৰক',
+  priceLabel: 'পৰামৰ্শ মাচুল',
+  durationLabel: 'সময়সীমা',
+  availabilityLabel: 'উপলব্ধতা',
+  createProfileBtn: 'প্ৰফাইল বনাই আৰম্ভ কৰক',
+
+  // Common UI
+  nextBtn: 'পৰৱৰ্তী',
+  backBtn: 'পাছলৈ',
+  stepOf: 'পৰ্যায় {current} / {total}',
+  optional: 'ঐচ্ছিক',
+
   // Home Screen
   cropHelpHeroEyebrow: 'শস্য সুৰক্ষা আৰু পৰামৰ্শ (২ ছেকেণ্ডত)',
   cropHelpHeroTitle: 'আপোনাৰ পথাৰত কিবা সমস্যা হৈছে নেকি?',
@@ -26,7 +72,7 @@ export const as: Record<LocaleKeys, string> = {
   whatIsHappeningTitle: 'আপোনাৰ পথাৰত কি সমস্যা হৈছে?',
   whatIsHappeningSub: 'ভইচ, কেমেৰা বা লিখি জনাওক।',
   speakTitle: '১. আপোনাৰ ভাষাত কওক',
-  speakSub: 'মাইক বুটাম টিপি আপোনাৰ শস্যৰ সমস্যা কওক',
+  speakSub: 'মাইক বুটাম টিপি আপোনাৰ শস্যৰ समस्या কওক',
   tapToSpeak: 'কবলৈ স্পৰ্শ কৰক',
   listening: 'ৰেকৰ্ডিং চলি আছে...',
   reRecord: 'পুনৰ ৰেকৰ্ড কৰক',

@@ -3,6 +3,7 @@ import { StyleSheet, View, Alert, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { FarmerHeader } from '@/components/home/FarmerHeader';
 import { HeroVoiceCameraAction } from '@/components/home/HeroVoiceCameraAction';
@@ -12,9 +13,14 @@ import { MandiRatesOverview } from '@/components/home/MandiRatesOverview';
 import { FeaturedExpertsSection } from '@/components/home/FeaturedExpertsSection';
 import { SeasonalTipsSection } from '@/components/home/SeasonalTipsSection';
 import { LoadingState } from '@/components/ui/LoadingState';
-import { LandingSplashScreen } from '@/components/onboarding/LandingSplashScreen';
-import { FarmerRegistrationWalkthrough } from '@/components/onboarding/FarmerRegistrationWalkthrough';
-import { ExpertRegistrationWalkthrough } from '@/components/onboarding/ExpertRegistrationWalkthrough';
+
+// Entry Sequence Screens
+import { SplashScreen } from '@/components/entry/SplashScreen';
+import { LanguageSelectionScreen } from '@/components/entry/LanguageSelectionScreen';
+import { RoleSelectionScreen } from '@/components/entry/RoleSelectionScreen';
+import { FarmerOnboarding } from '@/components/entry/FarmerOnboarding';
+import { ExpertOnboarding } from '@/components/entry/ExpertOnboarding';
+
 import { ApiService } from '@/services/apiService';
 import {
   WeatherAdvisory,
@@ -22,19 +28,29 @@ import {
   MandiRate,
   AgriculturalExpert,
   SeasonalTip,
+  UserRole,
+  FarmerProfile,
 } from '@/types';
+
+type EntryState = 'splash' | 'language' | 'role' | 'onboarding';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { language } = useLanguage();
   const {
+    isSessionLoading,
     hasCompletedOnboarding,
     userRole,
     farmerProfile,
     selectRole,
+    updateFarmerProfile,
+    updateExpertProfile,
+    completeOnboarding,
     resetOnboarding,
   } = useAuth();
 
-  const [loading, setLoading] = useState(true);
+  const [entryState, setEntryState] = useState<EntryState>('splash');
+  const [loadingData, setLoadingData] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const [weather, setWeather] = useState<WeatherAdvisory | null>(null);
@@ -61,7 +77,7 @@ export default function HomeScreen() {
     } catch (error) {
       console.error('Failed to load home screen data:', error);
     } finally {
-      setLoading(false);
+      setLoadingData(false);
       setRefreshing(false);
     }
   };
@@ -75,51 +91,81 @@ export default function HomeScreen() {
     loadData();
   };
 
-  const handleVoicePress = () => {
-    router.push('/ask-help');
+  // ENTRY SEQUENCE HANDLERS
+  const handleSplashFinish = () => {
+    setEntryState('language');
   };
 
-  const handleCameraPress = () => {
-    router.push('/ask-help');
+  const handleLanguageContinue = () => {
+    setEntryState('role');
   };
 
-  const handleExpertCall = (expert: AgriculturalExpert) => {
-    Alert.alert(
-      'Connecting to Expert',
-      `Directly calling ${expert.name} (${expert.designation}). Free agricultural advice line.`
-    );
+  const handleRoleSelect = (role: UserRole) => {
+    selectRole(role);
+    setEntryState('onboarding');
   };
 
-  const handleExpertChat = (expert: AgriculturalExpert) => {
-    router.push('/ask-help');
+  const handleFarmerOnboardingComplete = async (profile: Partial<FarmerProfile>) => {
+    updateFarmerProfile(profile);
+    await completeOnboarding(language);
   };
 
-  // ONBOARDING SCREEN STEP 1: Landing Splash & Role Choice
-  if (!userRole && !hasCompletedOnboarding) {
-    return <LandingSplashScreen onRoleSelected={(role) => selectRole(role)} />;
-  }
+  const handleExpertOnboardingComplete = async (profile: Partial<AgriculturalExpert>) => {
+    updateExpertProfile(profile);
+    await completeOnboarding(language);
+    router.push('/expert-portal');
+  };
 
-  // ONBOARDING SCREEN STEP 2: Farmer Registration Walkthrough
-  if (userRole === 'farmer' && !hasCompletedOnboarding) {
+  // 1. Loading Session State
+  if (isSessionLoading) {
     return (
-      <FarmerRegistrationWalkthrough
-        onComplete={() => {}}
-        onBackToSplash={resetOnboarding}
-      />
+      <ScreenContainer>
+        <LoadingState message="AgriSetu..." />
+      </ScreenContainer>
     );
   }
 
-  // ONBOARDING SCREEN STEP 2: Expert Registration Walkthrough
-  if (userRole === 'expert' && !hasCompletedOnboarding) {
-    return (
-      <ExpertRegistrationWalkthrough
-        onComplete={() => router.push('/expert-portal')}
-        onBackToSplash={resetOnboarding}
-      />
-    );
+  // 2. FIRST-TIME UNAUTHENTICATED ENTRY FLOW
+  if (!hasCompletedOnboarding) {
+    if (entryState === 'splash') {
+      return <SplashScreen onFinish={handleSplashFinish} />;
+    }
+
+    if (entryState === 'language') {
+      return <LanguageSelectionScreen onContinue={handleLanguageContinue} />;
+    }
+
+    if (entryState === 'role') {
+      return <RoleSelectionScreen onRoleSelect={handleRoleSelect} />;
+    }
+
+    if (entryState === 'onboarding') {
+      if (userRole === 'expert') {
+        return (
+          <ExpertOnboarding
+            onComplete={handleExpertOnboardingComplete}
+            onBack={() => setEntryState('role')}
+          />
+        );
+      }
+
+      return (
+        <FarmerOnboarding
+          onComplete={handleFarmerOnboardingComplete}
+          onBack={() => setEntryState('role')}
+        />
+      );
+    }
   }
 
-  if (loading || !weather) {
+  // 3. PERSISTED EXPERT ROLE EXPERIENCE
+  if (userRole === 'expert') {
+    // If expert role is active, auto-route to Expert Portal Dashboard
+    router.push('/expert-portal');
+  }
+
+  // 4. PERSISTED FARMER ROLE EXPERIENCE
+  if (loadingData || !weather) {
     return (
       <ScreenContainer>
         <LoadingState message="Connecting with Krishi Vigyan Kendra & Mandi..." />
@@ -143,7 +189,7 @@ export default function HomeScreen() {
       {/* Farmer Profile Header */}
       <FarmerHeader
         farmerName={farmerProfile.name}
-        location={`${farmerProfile.village}, ${farmerProfile.district}`}
+        location={`${farmerProfile.village || farmerProfile.district}, ${farmerProfile.state}`}
         language={farmerProfile.preferredLanguage}
         onNotificationPress={() => Alert.alert('Notifications', 'No new crop alerts today.')}
         onProfilePress={() => router.push('/profile')}
@@ -151,8 +197,8 @@ export default function HomeScreen() {
 
       {/* Primary 2-Second Action Block: Voice & Camera */}
       <HeroVoiceCameraAction
-        onVoicePress={handleVoicePress}
-        onCameraPress={handleCameraPress}
+        onVoicePress={() => router.push('/ask-help')}
+        onCameraPress={() => router.push('/ask-help')}
       />
 
       {/* Active Crop Query Tracker */}
@@ -174,8 +220,8 @@ export default function HomeScreen() {
       {/* Featured KVK Agricultural Experts */}
       <FeaturedExpertsSection
         experts={experts}
-        onExpertCall={handleExpertCall}
-        onExpertChat={handleExpertChat}
+        onExpertCall={(exp) => Alert.alert('Call Expert', `Calling ${exp.name}...`)}
+        onExpertChat={(exp) => router.push('/ask-help')}
         onViewAllPress={() => router.push('/experts')}
       />
 

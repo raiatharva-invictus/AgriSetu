@@ -3,6 +3,7 @@ import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, BorderRadius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { OrganizationType } from '@/types';
 import { Typography } from '../ui/Typography';
 import { Input } from '../ui/Input';
@@ -19,6 +20,7 @@ export const ExpertRegistrationWalkthrough: React.FC<ExpertRegistrationWalkthrou
   onBackToSplash,
 }) => {
   const { expertProfile, updateExpertProfile, completeOnboarding } = useAuth();
+  const { language } = useLanguage();
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   const [name, setName] = useState(expertProfile.name);
@@ -52,7 +54,7 @@ export const ExpertRegistrationWalkthrough: React.FC<ExpertRegistrationWalkthrou
     }
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     updateExpertProfile({
       name: name || 'Dr. Suresh Deshmukh',
       designation: designation || 'Senior Crop Protection Agronomist',
@@ -61,7 +63,7 @@ export const ExpertRegistrationWalkthrough: React.FC<ExpertRegistrationWalkthrou
       specialty: selectedSpecialties.length > 0 ? selectedSpecialties : ['Cotton Diseases'],
       feeText: feeText || 'Free Basic Guidance',
     });
-    completeOnboarding();
+    await completeOnboarding(language);
     onComplete();
   };
 
