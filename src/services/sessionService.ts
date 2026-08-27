@@ -62,6 +62,7 @@ export class LocalDeviceSessionAdapter implements ISessionService {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
         window.localStorage.removeItem(SESSION_STORAGE_KEY);
+        window.localStorage.clear();
       }
     } catch (e) {
       console.warn('Session clear warning:', e);

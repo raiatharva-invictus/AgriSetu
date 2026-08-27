@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, Alert, ViewStyle } from 'react-native';
+import { StyleSheet, TouchableOpacity, Alert, ViewStyle, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, BorderRadius, Spacing } from '@/constants/theme';
@@ -18,22 +18,49 @@ export const DemoResetButton: React.FC<DemoResetButtonProps> = ({
   const router = useRouter();
   const { resetOnboarding } = useAuth();
 
+  const performReset = async () => {
+    try {
+      await resetOnboarding();
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        window.localStorage.clear();
+        window.location.href = '/';
+      } else {
+        router.replace('/');
+      }
+    } catch (e) {
+      console.warn('Reset error:', e);
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
+    }
+  };
+
   const handleReset = () => {
-    Alert.alert(
-      'Reset Demo State?',
-      'This will clear local session storage and restart the app from Splash & Language Selection. Useful for live hackathon presentations.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset & Re-onboard',
-          style: 'destructive',
-          onPress: async () => {
-            await resetOnboarding();
-            router.replace('/');
+    if (Platform.OS === 'web') {
+      const confirmed =
+        typeof window !== 'undefined' && window.confirm
+          ? window.confirm(
+              'Reset Demo State?\n\nThis will clear local session storage and restart the app from Splash & Language Selection. Useful for live hackathon presentations.'
+            )
+          : true;
+
+      if (confirmed) {
+        performReset();
+      }
+    } else {
+      Alert.alert(
+        'Reset Demo State?',
+        'This will clear local session storage and restart the app from Splash & Language Selection. Useful for live hackathon presentations.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Reset & Re-onboard',
+            style: 'destructive',
+            onPress: performReset,
           },
-        },
-      ]
-    );
+        ]
+      );
+    }
   };
 
   const isDark = variant === 'dark';
