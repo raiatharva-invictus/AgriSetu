@@ -1,7 +1,7 @@
 import { LanguageCode } from '@/locales';
 
 export interface LanguageCapability {
-  code: LanguageCode;
+  code: string;
   displayName: string;
   nativeName: string;
   stt: boolean;
@@ -10,9 +10,10 @@ export interface LanguageCapability {
   ui: boolean;
   primaryProvider: 'sarvam' | 'bhashini';
   sttModel?: string;
+  bcp47Code?: string;
 }
 
-export const LANGUAGE_REGISTRY: Record<LanguageCode, LanguageCapability> = {
+export const LANGUAGE_REGISTRY: Record<string, LanguageCapability> = {
   en: {
     code: 'en',
     displayName: 'English',
@@ -23,6 +24,7 @@ export const LANGUAGE_REGISTRY: Record<LanguageCode, LanguageCapability> = {
     ui: true,
     primaryProvider: 'sarvam',
     sttModel: 'saaras:v3',
+    bcp47Code: 'en-IN',
   },
   hi: {
     code: 'hi',
@@ -34,6 +36,7 @@ export const LANGUAGE_REGISTRY: Record<LanguageCode, LanguageCapability> = {
     ui: true,
     primaryProvider: 'sarvam',
     sttModel: 'saaras:v3',
+    bcp47Code: 'hi-IN',
   },
   bn: {
     code: 'bn',
@@ -45,6 +48,7 @@ export const LANGUAGE_REGISTRY: Record<LanguageCode, LanguageCapability> = {
     ui: true,
     primaryProvider: 'sarvam',
     sttModel: 'saaras:v3',
+    bcp47Code: 'bn-IN',
   },
   as: {
     code: 'as',
@@ -56,6 +60,103 @@ export const LANGUAGE_REGISTRY: Record<LanguageCode, LanguageCapability> = {
     ui: true,
     primaryProvider: 'bhashini',
     sttModel: 'bhashini:v2',
+    bcp47Code: 'as-IN',
+  },
+  mr: {
+    code: 'mr',
+    displayName: 'Marathi',
+    nativeName: 'मराठी',
+    stt: true,
+    tts: true,
+    translation: true,
+    ui: false,
+    primaryProvider: 'sarvam',
+    sttModel: 'saaras:v3',
+    bcp47Code: 'mr-IN',
+  },
+  gu: {
+    code: 'gu',
+    displayName: 'Gujarati',
+    nativeName: 'ગુજરાતી',
+    stt: true,
+    tts: true,
+    translation: true,
+    ui: false,
+    primaryProvider: 'sarvam',
+    sttModel: 'saaras:v3',
+    bcp47Code: 'gu-IN',
+  },
+  ta: {
+    code: 'ta',
+    displayName: 'Tamil',
+    nativeName: 'தமிழ்',
+    stt: true,
+    tts: true,
+    translation: true,
+    ui: false,
+    primaryProvider: 'sarvam',
+    sttModel: 'saaras:v3',
+    bcp47Code: 'ta-IN',
+  },
+  te: {
+    code: 'te',
+    displayName: 'Telugu',
+    nativeName: 'తెలుగు',
+    stt: true,
+    tts: true,
+    translation: true,
+    ui: false,
+    primaryProvider: 'sarvam',
+    sttModel: 'saaras:v3',
+    bcp47Code: 'te-IN',
+  },
+  kn: {
+    code: 'kn',
+    displayName: 'Kannada',
+    nativeName: 'ಕನ್ನಡ',
+    stt: true,
+    tts: true,
+    translation: true,
+    ui: false,
+    primaryProvider: 'sarvam',
+    sttModel: 'saaras:v3',
+    bcp47Code: 'kn-IN',
+  },
+  ml: {
+    code: 'ml',
+    displayName: 'Malayalam',
+    nativeName: 'മലയാളം',
+    stt: true,
+    tts: true,
+    translation: true,
+    ui: false,
+    primaryProvider: 'sarvam',
+    sttModel: 'saaras:v3',
+    bcp47Code: 'ml-IN',
+  },
+  pa: {
+    code: 'pa',
+    displayName: 'Punjabi',
+    nativeName: 'ਪੰਜਾਬੀ',
+    stt: true,
+    tts: true,
+    translation: true,
+    ui: false,
+    primaryProvider: 'sarvam',
+    sttModel: 'saaras:v3',
+    bcp47Code: 'pa-IN',
+  },
+  or: {
+    code: 'or',
+    displayName: 'Odia',
+    nativeName: 'ଓଡ଼ିଆ',
+    stt: true,
+    tts: true,
+    translation: true,
+    ui: false,
+    primaryProvider: 'sarvam',
+    sttModel: 'saaras:v3',
+    bcp47Code: 'or-IN',
   },
 };
 
@@ -69,25 +170,19 @@ export interface STTResponse {
 export class SarvamAdapter {
   private model: string = 'saaras:v3'; // Official current Sarvam STT model
 
-  async speechToText(audioUri: string, lang: LanguageCode): Promise<STTResponse> {
-    // Calling via Supabase Edge Function to protect API key
+  async speechToText(audioUri: string, lang: string): Promise<STTResponse> {
     try {
-      const langCodeMap: Record<string, string> = {
-        hi: 'hi-IN',
-        bn: 'bn-IN',
-        en: 'en-IN',
-      };
-      const sarvamLang = langCodeMap[lang] || 'hi-IN';
+      const cap = LANGUAGE_REGISTRY[lang];
+      const bcp47 = cap?.bcp47Code || 'hi-IN';
 
       // Live payload structure for saaras:v3
       const payload = {
         model: this.model,
-        language_code: sarvamLang,
+        language_code: bcp47,
         audio_uri: audioUri,
       };
 
       // When server Edge Function is active, calls POST /functions/v1/language-speech
-      // Returning fallback if server credentials are not configured yet
     } catch (e) {
       console.warn('Sarvam saaras:v3 ASR failed, using fallback:', e);
     }
@@ -95,14 +190,18 @@ export class SarvamAdapter {
     return this.getFallbackSTT(lang, 'sarvam', this.model);
   }
 
-  private getFallbackSTT(lang: LanguageCode, provider: 'sarvam' | 'bhashini', model: string): STTResponse {
-    let transcript = 'Small insects are visible on tomato leaves and the leaves are curling upwards.';
-    if (lang === 'hi') {
+  private getFallbackSTT(lang: string, provider: 'sarvam' | 'bhashini', model: string): STTResponse {
+    let transcript = 'Small insects are visible on crop leaves and the leaves are curling.';
+    if (lang === 'hi' || lang === 'mr') {
       transcript = 'टमाटर के पत्तों पर छोटे कीड़े दिखाई दे रहे हैं और पत्ते ऊपर की तरफ मुड़ रहे हैं। कीट नियंत्रण का उपाय बताएं।';
     } else if (lang === 'bn') {
       transcript = 'টমেটো পাতায় ছোট পোকা দেখা যাচ্ছে এবং পাতাগুলি কোঁকড়ে যাচ্ছে। প্রতিকার বলুন।';
     } else if (lang === 'as') {
       transcript = 'বিলাহী পাতত সৰু পোকা দেখা গৈছে আৰু পাতবোৰ কোঁচ খাই গৈছে। কি কৰিম কওক।';
+    } else if (lang === 'ta') {
+      transcript = 'தக்காளி இலையில் பூச்சிகள் காணப்படுகின்றன மற்றும் இலைகள் சுருளுகின்றன.';
+    } else if (lang === 'te') {
+      transcript = 'టమాటో ఆకులపై పురుగులు కనిపిస్తున్నాయి మరియు ఆకులు ముడుచుకుంటున్నాయి.';
     }
 
     return {
@@ -115,7 +214,7 @@ export class SarvamAdapter {
 }
 
 export class BhashiniAdapter {
-  async speechToText(audioUri: string, lang: LanguageCode): Promise<STTResponse> {
+  async speechToText(audioUri: string, lang: string): Promise<STTResponse> {
     return {
       transcript: 'বিলাহী পাতত সৰু পোকা দেখা গৈছে আৰু পাতবোৰ কোঁচ খাই গৈছে। কি কৰিম কওক।',
       isLiveProvider: false,
@@ -124,7 +223,7 @@ export class BhashiniAdapter {
     };
   }
 
-  async translate(text: string, sourceLang: LanguageCode, targetLang: LanguageCode): Promise<string> {
+  async translate(text: string, sourceLang: string, targetLang: string): Promise<string> {
     if (sourceLang === targetLang) return text;
     return `[BHASHINI Translated ${sourceLang.toUpperCase()} -> ${targetLang.toUpperCase()}]: ${text}`;
   }
@@ -151,7 +250,7 @@ export class LanguageService {
     return `https://cdn.agrisetu.org/audio/tts_${lang}_${Date.now()}.mp3`;
   }
 
-  getCapabilities(): Record<LanguageCode, LanguageCapability> {
+  getCapabilities(): Record<string, LanguageCapability> {
     return LANGUAGE_REGISTRY;
   }
 }
