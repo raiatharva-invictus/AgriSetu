@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Alert, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { FarmerHeader } from '@/components/home/FarmerHeader';
 import { HeroVoiceCameraAction } from '@/components/home/HeroVoiceCameraAction';
@@ -11,9 +12,11 @@ import { MandiRatesOverview } from '@/components/home/MandiRatesOverview';
 import { FeaturedExpertsSection } from '@/components/home/FeaturedExpertsSection';
 import { SeasonalTipsSection } from '@/components/home/SeasonalTipsSection';
 import { LoadingState } from '@/components/ui/LoadingState';
+import { LandingSplashScreen } from '@/components/onboarding/LandingSplashScreen';
+import { FarmerRegistrationWalkthrough } from '@/components/onboarding/FarmerRegistrationWalkthrough';
+import { ExpertRegistrationWalkthrough } from '@/components/onboarding/ExpertRegistrationWalkthrough';
 import { ApiService } from '@/services/apiService';
 import {
-  FarmerProfile,
   WeatherAdvisory,
   CropCase,
   MandiRate,
@@ -23,11 +26,17 @@ import {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const {
+    hasCompletedOnboarding,
+    userRole,
+    farmerProfile,
+    selectRole,
+    resetOnboarding,
+  } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const [farmer, setFarmer] = useState<FarmerProfile | null>(null);
   const [weather, setWeather] = useState<WeatherAdvisory | null>(null);
   const [activeCase, setActiveCase] = useState<CropCase | null>(null);
   const [mandiRates, setMandiRates] = useState<MandiRate[]>([]);
@@ -36,8 +45,7 @@ export default function HomeScreen() {
 
   const loadData = async () => {
     try {
-      const [fData, wData, cData, mData, eData, tData] = await Promise.all([
-        ApiService.getFarmerProfile(),
+      const [wData, cData, mData, eData, tData] = await Promise.all([
         ApiService.getWeatherAdvisory(),
         ApiService.getActiveCropCase(),
         ApiService.getMandiRates(),
@@ -45,7 +53,6 @@ export default function HomeScreen() {
         ApiService.getSeasonalTips(),
       ]);
 
-      setFarmer(fData);
       setWeather(wData);
       setActiveCase(cData);
       setMandiRates(mData);
@@ -87,7 +94,32 @@ export default function HomeScreen() {
     router.push('/ask-help');
   };
 
-  if (loading || !farmer || !weather) {
+  // ONBOARDING SCREEN STEP 1: Landing Splash & Role Choice
+  if (!userRole && !hasCompletedOnboarding) {
+    return <LandingSplashScreen onRoleSelected={(role) => selectRole(role)} />;
+  }
+
+  // ONBOARDING SCREEN STEP 2: Farmer Registration Walkthrough
+  if (userRole === 'farmer' && !hasCompletedOnboarding) {
+    return (
+      <FarmerRegistrationWalkthrough
+        onComplete={() => {}}
+        onBackToSplash={resetOnboarding}
+      />
+    );
+  }
+
+  // ONBOARDING SCREEN STEP 2: Expert Registration Walkthrough
+  if (userRole === 'expert' && !hasCompletedOnboarding) {
+    return (
+      <ExpertRegistrationWalkthrough
+        onComplete={() => router.push('/expert-portal')}
+        onBackToSplash={resetOnboarding}
+      />
+    );
+  }
+
+  if (loading || !weather) {
     return (
       <ScreenContainer>
         <LoadingState message="Connecting with Krishi Vigyan Kendra & Mandi..." />
@@ -110,9 +142,9 @@ export default function HomeScreen() {
     >
       {/* Farmer Profile Header */}
       <FarmerHeader
-        farmerName={farmer.name}
-        location={`${farmer.village}, ${farmer.district}`}
-        language={farmer.preferredLanguage}
+        farmerName={farmerProfile.name}
+        location={`${farmerProfile.village}, ${farmerProfile.district}`}
+        language={farmerProfile.preferredLanguage}
         onNotificationPress={() => Alert.alert('Notifications', 'No new crop alerts today.')}
         onProfilePress={() => router.push('/profile')}
       />

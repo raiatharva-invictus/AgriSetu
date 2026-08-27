@@ -9,6 +9,7 @@ export interface FarmerProfile {
   preferredLanguage: string; // e.g. 'Hindi', 'Marathi', 'Punjabi', 'English'
   primaryCrops: string[];
   landAreaAcres: number;
+  landSize?: string;
   phoneNumber?: string;
   avatarUrl?: string;
 }

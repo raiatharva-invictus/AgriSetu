@@ -1,49 +1,17 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { Colors, BorderRadius, Spacing, Shadows } from '@/constants/theme';
+import { Colors, BorderRadius, Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
+import { LanguageModal } from '@/components/ui/LanguageModal';
+import { Button } from '@/components/ui/Button';
 
 export default function ProfileScreen() {
-  const farmerData = {
-    name: 'Ramesh Patel',
-    phone: '+91 98765 43210',
-    village: 'Katol, Nagpur District',
-    state: 'Maharashtra',
-    landSize: '5.5 Acres',
-    mainCrops: ['Wheat (गेहूं)', 'Cotton (कपास)', 'Soybean (सोयाबीन)'],
-    language: 'Hindi / हिंदी',
-    kisanCreditCard: 'Verified ✓',
-  };
-
-  const menuSections = [
-    {
-      id: 'farm',
-      title: 'Farm Details',
-      subtitle: 'Land size, crop records & soil test reports',
-      icon: <MaterialCommunityIcons name="tractor" size={22} color={Colors.primaryLight} />,
-    },
-    {
-      id: 'language',
-      title: 'App Language',
-      subtitle: 'Currently set to Hindi / हिंदी',
-      icon: <Ionicons name="language" size={22} color={Colors.primaryLight} />,
-    },
-    {
-      id: 'saved',
-      title: 'Saved Tips & Advisory',
-      subtitle: '4 bookmarks',
-      icon: <Ionicons name="bookmark" size={22} color={Colors.primaryLight} />,
-    },
-    {
-      id: 'help',
-      title: 'Help & Helpline Support',
-      subtitle: 'Kisan Call Centre 1800-180-1551',
-      icon: <Ionicons name="call" size={22} color={Colors.primaryLight} />,
-    },
-  ];
+  const { farmerProfile, userRole, resetOnboarding } = useAuth();
+  const [langModalVisible, setLangModalVisible] = useState(false);
 
   return (
     <ScreenContainer scrollable={true}>
@@ -52,28 +20,36 @@ export default function ProfileScreen() {
         <View style={styles.avatarLarge}>
           <Ionicons name="person" size={40} color="#FFFFFF" />
         </View>
-        <Text style={styles.farmerName}>{farmerData.name}</Text>
-        <Text style={styles.farmerLocation}>{farmerData.village}, {farmerData.state}</Text>
-        <Badge label={`Kisan ID: ${farmerData.kisanCreditCard}`} variant="success" style={styles.badgeMargin} />
+        <Text style={styles.farmerName}>{farmerProfile.name}</Text>
+        <Text style={styles.farmerLocation}>
+          {farmerProfile.village}, {farmerProfile.district}
+        </Text>
+        <Badge
+          label={`Role: ${userRole === 'expert' ? 'Agricultural Scientist' : 'Verified Farmer'}`}
+          variant="success"
+          style={styles.badgeMargin}
+        />
       </View>
 
       <View style={styles.content}>
         {/* Farm Summary Card */}
         <Card style={styles.summaryCard} variant="elevated">
-          <Text style={styles.cardHeaderTitle}>Farm Overview</Text>
+          <Text style={styles.cardHeaderTitle}>Farm & Crop Overview</Text>
 
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
-              <Ionicons name="map-outline" size={20} color={Colors.primaryLight} />
-              <Text style={styles.statNumber}>{farmerData.landSize}</Text>
+              <Ionicons name="map-outline" size={20} color={Colors.primary} />
+              <Text style={styles.statNumber}>{farmerProfile.landSize || '5.5 Acres'}</Text>
               <Text style={styles.statLabel}>Total Land</Text>
             </View>
 
             <View style={styles.statDivider} />
 
             <View style={styles.statBox}>
-              <MaterialCommunityIcons name="sprout-outline" size={20} color={Colors.primaryLight} />
-              <Text style={styles.statNumber}>{farmerData.mainCrops.length} Crops</Text>
+              <MaterialCommunityIcons name="sprout-outline" size={20} color={Colors.primary} />
+              <Text style={styles.statNumber}>
+                {farmerProfile.primaryCrops.length} Crops
+              </Text>
               <Text style={styles.statLabel}>Active Season</Text>
             </View>
           </View>
@@ -81,7 +57,7 @@ export default function ProfileScreen() {
           <View style={styles.cropsTagsRow}>
             <Text style={styles.cropsLabel}>Primary Crops: </Text>
             <View style={styles.cropPills}>
-              {farmerData.mainCrops.map((c) => (
+              {farmerProfile.primaryCrops.map((c) => (
                 <View key={c} style={styles.cropPill}>
                   <Text style={styles.cropPillText}>{c}</Text>
                 </View>
@@ -90,28 +66,63 @@ export default function ProfileScreen() {
           </View>
         </Card>
 
-        {/* Settings Menu List */}
+        {/* Account Options */}
         <View style={styles.menuSection}>
-          <Text style={styles.menuGroupTitle}>Account Settings</Text>
+          <Text style={styles.menuGroupTitle}>App Controls & Settings</Text>
 
-          {menuSections.map((item) => (
-            <Card key={item.id} style={styles.menuCard} variant="outlined" onPress={() => {}}>
-              <View style={styles.menuRow}>
-                <View style={styles.menuIconBox}>{item.icon}</View>
-                <View style={styles.menuTextGroup}>
-                  <Text style={styles.menuTitle}>{item.title}</Text>
-                  <Text style={styles.menuSubtitle}>{item.subtitle}</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={Colors.textLight} />
+          <Card
+            style={styles.menuCard}
+            variant="outlined"
+            onPress={() => setLangModalVisible(true)}
+          >
+            <View style={styles.menuRow}>
+              <View style={styles.menuIconBox}>
+                <Ionicons name="language" size={22} color={Colors.primary} />
               </View>
-            </Card>
-          ))}
+              <View style={styles.menuTextGroup}>
+                <Text style={styles.menuTitle}>Change App Language</Text>
+                <Text style={styles.menuSubtitle}>
+                  {farmerProfile.preferredLanguage} • Switch between English, Hindi, Bengali, Assamese
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
+            </View>
+          </Card>
+
+          <Card
+            style={styles.menuCard}
+            variant="outlined"
+            onPress={() =>
+              Alert.alert('Kisan Helpline', 'Connecting to Kisan Call Centre 1800-180-1551...')
+            }
+          >
+            <View style={styles.menuRow}>
+              <View style={styles.menuIconBox}>
+                <Ionicons name="call" size={22} color={Colors.primary} />
+              </View>
+              <View style={styles.menuTextGroup}>
+                <Text style={styles.menuTitle}>Kisan Call Centre Helpline</Text>
+                <Text style={styles.menuSubtitle}>Free 24/7 Government Toll Free 1800-180-1551</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
+            </View>
+          </Card>
+
+          <Button
+            title="पुनः भूमिका चुनें (Re-run Onboarding / Switch Persona)"
+            onPress={resetOnboarding}
+            variant="outline"
+            size="medium"
+            style={styles.resetBtn}
+          />
         </View>
 
         <View style={styles.versionContainer}>
-          <Text style={styles.versionText}>AgriSetu v1.0.0 (Android Expo)</Text>
+          <Text style={styles.versionText}>AgriSetu v1.0.0 (Expo Web & Android)</Text>
         </View>
       </View>
+
+      <LanguageModal visible={langModalVisible} onClose={() => setLangModalVisible(false)} />
     </ScreenContainer>
   );
 }
@@ -165,7 +176,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    backgroundColor: Colors.surfaceTint,
+    backgroundColor: Colors.surfaceSecondary,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,
   },
@@ -185,7 +196,7 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: 32,
-    backgroundColor: '#C8E6C9',
+    backgroundColor: Colors.cardBorder,
   },
   cropsTagsRow: {
     marginTop: Spacing.md,
@@ -201,7 +212,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   cropPill: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: Colors.primaryContainer,
     paddingHorizontal: Spacing.md,
     paddingVertical: 4,
     borderRadius: BorderRadius.sm,
@@ -210,8 +221,8 @@ const styles = StyleSheet.create({
   },
   cropPillText: {
     fontSize: 12,
-    color: Colors.textPrimary,
-    fontWeight: '500',
+    color: Colors.primaryDark,
+    fontWeight: '600',
   },
   menuSection: {
     marginTop: Spacing.xl,
@@ -234,7 +245,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.surfaceTint,
+    backgroundColor: Colors.primaryContainer,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: Spacing.md,
@@ -252,12 +263,15 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginTop: 2,
   },
+  resetBtn: {
+    marginTop: Spacing.md,
+  },
   versionContainer: {
     alignItems: 'center',
     marginVertical: Spacing.xl,
   },
   versionText: {
     fontSize: 12,
-    color: Colors.textLight,
+    color: Colors.textMuted,
   },
 });
