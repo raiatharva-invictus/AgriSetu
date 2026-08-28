@@ -4,8 +4,10 @@ import {
   View,
   TouchableOpacity,
   Image,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { Colors, BorderRadius, Spacing, TouchTargets } from '@/constants/theme';
 import { Typography } from '../ui/Typography';
 
@@ -20,10 +22,47 @@ export const CameraInputCard: React.FC<CameraInputCardProps> = ({
   onPhotoCaptured,
   onPhotoCleared,
 }) => {
-  const handleSimulateCamera = () => {
-    // Simulate capturing a clear leaf photo
-    const sampleLeafPhoto = 'https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?w=600';
-    onPhotoCaptured(sampleLeafPhoto);
+  const handleLaunchCamera = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+      if (!permissionResult.granted) {
+        Alert.alert(
+          'कैमरा अनुमति आवश्यक है (Camera Permission Needed)',
+          'पौधे की फोटो लेने के लिए कृपया कैमरा एक्सेस की अनुमति दें।'
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+        allowsEditing: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        onPhotoCaptured(result.assets[0].uri);
+      }
+    } catch (err: any) {
+      console.warn('Camera launch error:', err);
+      // Fallback gallery selection
+      handleLaunchGallery();
+    }
+  };
+
+  const handleLaunchGallery = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+        allowsEditing: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        onPhotoCaptured(result.assets[0].uri);
+      }
+    } catch (err: any) {
+      console.warn('Gallery pick error:', err);
+    }
   };
 
   return (
@@ -63,21 +102,29 @@ export const CameraInputCard: React.FC<CameraInputCardProps> = ({
           </View>
         </View>
       ) : (
-        <TouchableOpacity
-          style={styles.cameraBox}
-          onPress={handleSimulateCamera}
-          activeOpacity={0.8}
-        >
-          <View style={styles.cameraIconCircle}>
-            <Ionicons name="camera" size={32} color={Colors.primary} />
-          </View>
-          <Typography variant="bodyBold" color={Colors.primaryDark}>
-            फोटो खींचें / फोटो चुनें (Take Photo)
-          </Typography>
-          <Typography variant="caption" color={Colors.textSecondary} style={styles.subtext}>
-            पत्तियों पर कीड़े, धब्बे या सूखे हिस्से को कैमरे के सामने लाएं
-          </Typography>
-        </TouchableOpacity>
+        <View style={styles.actionRow}>
+          <TouchableOpacity
+            style={styles.cameraHeroBtn}
+            onPress={handleLaunchCamera}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="camera-outline" size={28} color={Colors.primary} />
+            <Typography variant="label" color={Colors.primary} style={styles.btnLabel}>
+              कैमरा खोलें (Take Photo)
+            </Typography>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.galleryBtn}
+            onPress={handleLaunchGallery}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="images-outline" size={22} color={Colors.textSecondary} />
+            <Typography variant="caption" color={Colors.textSecondary} style={styles.btnLabel}>
+              गैलरी से चुनें (Gallery)
+            </Typography>
+          </TouchableOpacity>
+        </View>
       )}
     </View>
   );
@@ -88,9 +135,10 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
-    borderWidth: 1.5,
-    borderColor: Colors.cardBorder,
-    marginBottom: Spacing.lg,
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   headerRow: {
     flexDirection: 'row',
@@ -101,74 +149,92 @@ const styles = StyleSheet.create({
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceSecondary,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 4,
-    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.primaryLight + '25',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs / 2,
+    borderRadius: BorderRadius.sm,
+    gap: Spacing.xs,
   },
   badgeText: {
-    marginLeft: 4,
-    fontSize: 11,
+    fontWeight: '700',
   },
   title: {
-    marginTop: 2,
     marginBottom: Spacing.md,
   },
-  cameraBox: {
-    backgroundColor: Colors.primaryContainer,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    borderColor: Colors.primaryLight,
+  actionRow: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  cameraHeroBtn: {
+    flex: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primaryLight + '15',
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
     borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
+    paddingVertical: Spacing.md,
+    gap: Spacing.sm,
+    minHeight: TouchTargets.minHeight,
+  },
+  galleryBtn: {
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: TouchTargets.hero,
+    backgroundColor: Colors.backgroundSecondary,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: BorderRadius.lg,
+    paddingVertical: Spacing.md,
+    gap: Spacing.xs,
+    minHeight: TouchTargets.minHeight,
   },
-  cameraIconCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: Colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.xs,
-  },
-  subtext: {
-    marginTop: 2,
-    textAlign: 'center',
+  btnLabel: {
+    fontWeight: '600',
   },
   previewContainer: {
+    position: 'relative',
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    marginTop: Spacing.xs,
   },
   previewImage: {
     width: '100%',
-    height: 160,
-    backgroundColor: Colors.surfaceSecondary,
+    height: 180,
+    borderRadius: BorderRadius.lg,
   },
   overlayRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: Spacing.sm,
-    backgroundColor: Colors.surface,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   photoSuccessTag: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: Spacing.xs,
   },
   tagText: {
-    marginLeft: 4,
+    fontWeight: '600',
   },
   retakeBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.xs,
+    gap: 4,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.sm,
   },
   retakeText: {
-    marginLeft: 2,
+    fontWeight: '600',
   },
 });

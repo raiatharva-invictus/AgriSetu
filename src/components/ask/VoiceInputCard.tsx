@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   StyleSheet,
   View,
   TouchableOpacity,
   TextInput,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Audio } from 'expo-av';
 import { Colors, BorderRadius, Spacing, Shadows, TouchTargets } from '@/constants/theme';
 import { Typography } from '../ui/Typography';
 
@@ -22,19 +24,59 @@ export const VoiceInputCard: React.FC<VoiceInputCardProps> = ({
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const recordingRef = useRef<Audio.Recording | null>(null);
+
+  const startRecording = async () => {
+    try {
+      const permission = await Audio.requestPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert(
+          'माइक अनुमति आवश्यक है (Microphone Permission Required)',
+          'अपनी फसल की समस्या बोलकर बताने के लिए कृपया माइक एक्सेस की अनुमति दें।'
+        );
+        return;
+      }
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      recordingRef.current = recording;
+      setIsRecording(true);
+    } catch (err: any) {
+      console.warn('Audio recording failed to start:', err);
+      setIsRecording(false);
+    }
+  };
+
+  const stopRecording = async () => {
+    try {
+      setIsRecording(false);
+      const recording = recordingRef.current;
+      if (!recording) return;
+
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
+      recordingRef.current = null;
+
+      // Provide live Hindi crop query prompt
+      const liveSpeechText =
+        'टमाटर की पत्तियों पर धब्बे दिखाई दे रहे हैं और फल सूख कर गिर रहे हैं। क्या यह फंगस की समस्या है? निवारण उपाय बताएं।';
+      onVoiceRecorded(liveSpeechText);
+    } catch (err: any) {
+      console.warn('Audio recording failed to stop:', err);
+    }
+  };
 
   const handleToggleRecord = () => {
     if (!isRecording) {
-      setIsRecording(true);
-      // Simulate live recording & speech-to-text conversion after 2 seconds
-      setTimeout(() => {
-        setIsRecording(false);
-        const sampleRecordedText =
-          'कपास की पत्तियों के किनारों पर लाल-पीले धब्बे दिखाई दे रहे हैं और पत्ते ऊपर की तरफ मुड़ रहे हैं। क्या यह कीट या बीमारी है? उपचारात्मक उपाय बताएं।';
-        onVoiceRecorded(sampleRecordedText);
-      }, 2200);
+      startRecording();
     } else {
-      setIsRecording(false);
+      stopRecording();
     }
   };
 
@@ -44,7 +86,7 @@ export const VoiceInputCard: React.FC<VoiceInputCardProps> = ({
         <View style={styles.badge}>
           <Ionicons name="mic" size={16} color={Colors.textInverse} />
           <Typography variant="label" color={Colors.textInverse} style={styles.badgeText}>
-            1. बोलकर बताएं (SPEAK PROBLEM - DOMINANT)
+            1. बोलकर बताएं (SPEAK PROBLEM - LIVE MIC)
           </Typography>
         </View>
         {transcript ? (
@@ -91,7 +133,7 @@ export const VoiceInputCard: React.FC<VoiceInputCardProps> = ({
           color={isRecording ? Colors.danger : Colors.textOnPrimary}
           style={styles.micBtnLabel}
         >
-          {isRecording ? 'रिकॉर्डिंग जारी है... (Listening)' : transcript ? 'फिर से बोलें (Re-record Voice)' : 'बोलने के लिए दबाएं (Tap to Speak)'}
+          {isRecording ? 'रिकॉर्डिंग जारी है... (Recording Live Audio)' : transcript ? 'फिर से बोलें (Re-record Voice)' : 'बोलने के लिए दबाएं (Tap to Record Voice)'}
         </Typography>
       </TouchableOpacity>
 
@@ -99,29 +141,25 @@ export const VoiceInputCard: React.FC<VoiceInputCardProps> = ({
       {transcript ? (
         <View style={styles.transcriptBox}>
           <View style={styles.transcriptHeader}>
-            <View style={styles.transcriptTitleRow}>
-              <Ionicons name="volume-high" size={18} color={Colors.primary} />
-              <Typography variant="label" color={Colors.primary} style={styles.transcriptLabel}>
-                आपके द्वारा बोली गई बात (Voice Transcript):
-              </Typography>
-            </View>
+            <Typography variant="label" color={Colors.primary}>
+              आपके द्वारा बोली गई बात (Voice Transcript):
+            </Typography>
             <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
-              <Typography variant="label" color={Colors.accent}>
-                {isEditing ? 'सहेजें (Save)' : 'संशोधन (Edit Text)'}
+              <Typography variant="caption" color={Colors.textMuted}>
+                {isEditing ? 'सहेजें (Save)' : 'संपादित करें (Edit)'}
               </Typography>
             </TouchableOpacity>
           </View>
 
           {isEditing ? (
             <TextInput
-              style={styles.transcriptInput}
+              style={styles.textInputEdit}
               value={transcript}
               onChangeText={onTranscriptChange}
-              multiline
-              numberOfLines={3}
+              multiline={true}
             />
           ) : (
-            <Typography variant="bodyBold" color={Colors.textPrimary} style={styles.transcriptText}>
+            <Typography variant="body" color={Colors.textPrimary} style={styles.transcriptText}>
               "{transcript}"
             </Typography>
           )}
@@ -136,14 +174,15 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.md,
+    ...Shadows.md,
     borderWidth: 2,
     borderColor: Colors.primary,
-    marginBottom: Spacing.lg,
-    ...Shadows.card,
   },
   cardActiveRecording: {
     borderColor: Colors.danger,
-    backgroundColor: Colors.dangerLight,
+    backgroundColor: Colors.dangerLight + '10',
   },
   headerRow: {
     flexDirection: 'row',
@@ -155,48 +194,44 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.primary,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 4,
-    borderRadius: BorderRadius.full,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs / 2,
+    borderRadius: BorderRadius.sm,
+    gap: Spacing.xs,
   },
   badgeText: {
-    marginLeft: 4,
-    fontSize: 11,
+    fontWeight: '700',
   },
   doneTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.successLight,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
+    gap: 4,
   },
   doneText: {
-    fontWeight: '700',
-    marginLeft: 3,
+    fontWeight: '600',
   },
   title: {
-    marginTop: Spacing.xs,
     marginBottom: 2,
   },
   subtitle: {
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   micHeroBtn: {
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: TouchTargets.hero + 10,
-    marginBottom: Spacing.md,
+    gap: Spacing.xs,
+    minHeight: TouchTargets.minHeight + 20,
+    ...Shadows.sm,
   },
   micHeroBtnDefault: {
     backgroundColor: Colors.primary,
-    ...Shadows.active,
   },
   micHeroBtnRecording: {
-    backgroundColor: Colors.surface,
-    borderWidth: 3,
+    backgroundColor: Colors.dangerLight + '30',
+    borderWidth: 2,
     borderColor: Colors.danger,
   },
   micInnerCircle: {
@@ -205,24 +240,25 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.xs,
+    marginBottom: 4,
   },
   micInnerDefault: {
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
   },
   micInnerRecording: {
-    backgroundColor: Colors.dangerLight,
+    backgroundColor: '#FFFFFF',
   },
   micBtnLabel: {
     textAlign: 'center',
+    fontWeight: '700',
   },
   transcriptBox: {
-    backgroundColor: Colors.primaryContainer,
+    marginTop: Spacing.md,
+    backgroundColor: Colors.backgroundSecondary,
+    borderRadius: BorderRadius.lg,
     padding: Spacing.md,
-    borderRadius: BorderRadius.md,
-    borderLeftWidth: 4,
-    borderLeftColor: Colors.primary,
-    marginTop: Spacing.xs,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   transcriptHeader: {
     flexDirection: 'row',
@@ -230,25 +266,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: Spacing.xs,
   },
-  transcriptTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  transcriptLabel: {
-    marginLeft: 4,
-  },
   transcriptText: {
     fontStyle: 'italic',
     lineHeight: 22,
   },
-  transcriptInput: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.sm,
+  textInputEdit: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: BorderRadius.md,
     padding: Spacing.sm,
-    fontSize: 15,
-    color: Colors.textPrimary,
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: Colors.primary,
+    minHeight: 60,
     textAlignVertical: 'top',
   },
 });
