@@ -23,6 +23,8 @@ import { problemUnderstandingService } from '@/services/problemUnderstandingServ
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 
+import { DemoResetButton } from '@/components/common/DemoResetButton';
+
 export default function AskHelpScreen() {
   const router = useRouter();
   const { farmerProfile } = useAuth();
@@ -155,7 +157,7 @@ export default function AskHelpScreen() {
               <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
             </TouchableOpacity>
           )}
-          <View>
+          <View style={{ flex: 1 }}>
             <Typography variant="h2" color="#FFFFFF">
               {step === 1 ? 'अपनी समस्या बताएं' : 'समीक्षा व पुष्टि करें'}
             </Typography>
@@ -163,6 +165,7 @@ export default function AskHelpScreen() {
               {step === 1 ? 'Step 1 of 2: Guided Problem Input' : 'Step 2 of 2: AI Interpretation Review'}
             </Typography>
           </View>
+          <DemoResetButton variant="dark" />
         </View>
       </View>
 
