@@ -10,7 +10,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { Typography } from '@/components/ui/Typography';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { Colors, BorderRadius, Spacing, Shadows } from '@/constants/theme';
 import { VoiceInputCard } from '@/components/ask/VoiceInputCard';
 import { CameraInputCard } from '@/components/ask/CameraInputCard';
@@ -20,53 +19,76 @@ import {
   ProblemInterpretation,
 } from '@/components/ask/ProblemReviewCard';
 import { caseService } from '@/services/caseService';
+import { problemUnderstandingService } from '@/services/problemUnderstandingService';
+import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function AskHelpScreen() {
   const router = useRouter();
+  const { farmerProfile } = useAuth();
+  const { language } = useLanguage();
 
   // Multi-step Flow State: 1 = Guided Input, 2 = Interpretation Review, 3 = Expert Matched Success
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [liveDraft, setLiveDraft] = useState<any>(null);
 
   // Form & Input States
   const [transcript, setTranscript] = useState('');
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [typeText, setTypeText] = useState('');
-  const [selectedCrop, setSelectedCrop] = useState('Cotton (कपास)');
+  const [selectedCrop, setSelectedCrop] = useState('Cotton');
   const [location, setLocation] = useState('Kalmeshwar, Nagpur');
   const [urgency, setUrgency] = useState<'Normal' | 'Urgent'>('Normal');
 
   // Computed Interpretation State for Screen 2
   const interpretation: ProblemInterpretation = {
-    cropName: selectedCrop,
-    problemSummary: transcript
-      ? 'पत्तियों के किनारों पर लाल धब्बे व मुड़ना (Red Leaf Edges & Curling)'
-      : typeText || 'कीट संक्रमण या पादप रोग (Crop Disease Issue)',
-    symptoms: [
-      'पत्तियों के किनारों पर लाल धब्बे (Reddish spots on leaf margins)',
-      'पत्तियों का ऊपर की ओर मुड़ना (Upward leaf curling)',
-      'रस चूसक कीट की संभावना (Possible sap-sucking pest attack)',
-    ],
-    category: 'पादप रोग व कीट नियंत्रण (Plant Disease & Pest Control)',
-    region: location,
-    urgency: urgency === 'Urgent' ? 'अति आवश्यक (Urgent)' : 'सामान्य (Normal)',
+    cropName: liveDraft?.crop || selectedCrop,
+    problemSummary: liveDraft?.symptoms && liveDraft.symptoms.length > 0
+      ? liveDraft.symptoms.join(', ')
+      : (transcript || typeText || 'Crop Disease Query'),
+    symptoms: liveDraft?.symptoms || [transcript || typeText || 'Crop Symptom Analysis'],
+    category: liveDraft?.problemCategory || 'Plant Pathology & Pest Control',
+    region: liveDraft?.location || location,
+    urgency: (liveDraft?.urgency === 'High' || urgency === 'Urgent') ? 'Urgent' : 'Normal',
     voiceNoteAttached: Boolean(transcript),
     photoAttached: Boolean(photoUrl),
+    isLiveProvider: liveDraft?.isLiveProvider ?? true,
+    provider: liveDraft?.provider || 'gemini',
+    modelUsed: liveDraft?.modelUsed || 'gemini-3.6-flash',
   };
 
   const handleVoiceRecorded = (text: string) => {
     setTranscript(text);
   };
 
-  const handleProceedToReview = () => {
+  const handleProceedToReview = async () => {
     if (!transcript && !photoUrl && !typeText) {
       Alert.alert(
-        'जानकारी दें (Please Provide Info)',
-        'कृपया बोलकर बताएं, फोटो खींचें, या अपनी समस्या का विवरण टाइप करें।'
+        'Please Provide Info',
+        'Please record voice, take a photo, or type your crop problem.'
       );
       return;
     }
-    setStep(2);
+
+    setIsAnalyzing(true);
+    try {
+      const rawText = transcript || typeText || 'Crop disease query';
+      const draft = await problemUnderstandingService.processInput(
+        rawText,
+        language || 'en',
+        location,
+        Boolean(photoUrl)
+      );
+      setLiveDraft(draft);
+      setStep(2);
+    } catch (err: any) {
+      console.warn('AI analysis error:', err);
+      setStep(2);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleConfirmAndFindExpert = async () => {
@@ -74,15 +96,15 @@ export default function AskHelpScreen() {
     const descriptionText = transcript || typeText || 'Crop Disease & Pest Query';
 
     try {
-      // 1. Insert case into Supabase backend
+      // 1. Insert case into Supabase backend with actual live values
       const createdCase = await caseService.createCase({
-        farmer_id: session?.farmerProfile?.id || '11111111-1111-1111-1111-111111111111',
-        crop: selectedCrop,
+        farmer_id: farmerProfile?.id || '11111111-1111-1111-1111-111111111111',
+        crop: liveDraft?.crop || selectedCrop,
         title: interpretation.problemSummary,
         description: descriptionText,
-        problem_category: 'pest_disease',
-        location: location,
-        urgency: urgency,
+        problem_category: liveDraft?.problemCategory || 'pest_disease',
+        location: liveDraft?.location || location,
+        urgency: liveDraft?.urgency || urgency,
         status: 'new',
       });
 
@@ -97,22 +119,22 @@ export default function AskHelpScreen() {
         pathname: '/expert-match',
         params: {
           caseId,
-          crop: selectedCrop,
-          problemCategory: 'Plant Pathology & Pest Control',
+          crop: liveDraft?.crop || selectedCrop,
+          problemCategory: liveDraft?.problemCategory || 'Plant Pathology & Pest Control',
           description: descriptionText,
-          location: location,
-          urgency: urgency,
+          location: liveDraft?.location || location,
+          urgency: liveDraft?.urgency || urgency,
         },
       });
     } catch (err: any) {
       console.warn('Case creation error:', err);
-      // Seamless fallback
+      // Fallback navigation
       router.push({
         pathname: '/expert-match',
         params: {
           caseId: `c-${Date.now()}`,
-          crop: selectedCrop,
-          problemCategory: 'Plant Pathology',
+          crop: liveDraft?.crop || selectedCrop,
+          problemCategory: liveDraft?.problemCategory || 'Plant Pathology',
           description: descriptionText,
           location: location,
           urgency: urgency,
@@ -133,171 +155,66 @@ export default function AskHelpScreen() {
               <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
             </TouchableOpacity>
           )}
-          <View style={styles.headerTextGroup}>
-            <Typography variant="hero" color="#FFFFFF">
-              {step === 1
-                ? 'आपके खेत में क्या समस्या है?'
-                : step === 2
-                ? 'आपकी समस्या समझ आ गई है'
-                : 'कृषि वैज्ञानिक से संपर्क'}
+          <View>
+            <Typography variant="h2" color="#FFFFFF">
+              {step === 1 ? 'अपनी समस्या बताएं' : 'समीक्षा व पुष्टि करें'}
             </Typography>
-            <Typography variant="caption" color="#D1FAE5" style={styles.headerSubtitle}>
-              {step === 1
-                ? 'What is happening with your farm? Choose voice, camera, or text.'
-                : step === 2
-                ? 'Review structured crop problem summary before scientist routing.'
-                : 'Connected to KVK Senior Agronomist.'}
+            <Typography variant="caption" color="rgba(255,255,255,0.85)">
+              {step === 1 ? 'Step 1 of 2: Guided Problem Input' : 'Step 2 of 2: AI Interpretation Review'}
             </Typography>
           </View>
-        </View>
-
-        {/* Step Progress Bar */}
-        <View style={styles.progressBarRow}>
-          <View style={[styles.progressStep, step >= 1 && styles.progressStepActive]} />
-          <View style={[styles.progressStep, step >= 2 && styles.progressStepActive]} />
-          <View style={[styles.progressStep, step >= 3 && styles.progressStepActive]} />
         </View>
       </View>
 
-      <View style={styles.content}>
-        {/* ================= SCREEN 1: GUIDED MULTI-MODAL INPUT ================= */}
-        {step === 1 && (
-          <View>
-            {/* 1. SPEAK (Visually Dominant Hero) */}
-            <VoiceInputCard
-              transcript={transcript}
-              onTranscriptChange={setTranscript}
-              onVoiceRecorded={handleVoiceRecorded}
-            />
+      {step === 1 ? (
+        <View style={styles.stepContainer}>
+          {/* Card 1: Dominant Voice Input */}
+          <VoiceInputCard
+            transcript={transcript}
+            onTranscriptChange={setTranscript}
+            onVoiceRecorded={handleVoiceRecorded}
+          />
 
-            {/* 2. TAKE A PHOTO */}
-            <CameraInputCard
-              photoUrl={photoUrl}
-              onPhotoCaptured={(url) => setPhotoUrl(url)}
-              onPhotoCleared={() => setPhotoUrl(null)}
-            />
+          {/* Card 2: Camera Photo Input */}
+          <CameraInputCard
+            photoUrl={photoUrl}
+            onPhotoCaptured={setPhotoUrl}
+            onPhotoCleared={() => setPhotoUrl(null)}
+          />
 
-            {/* 3. TYPE (Option 3) */}
-            <View style={styles.card}>
-              <View style={styles.headerRow}>
-                <View style={styles.badge}>
-                  <Ionicons name="create" size={16} color={Colors.textPrimary} />
-                  <Typography variant="label" color={Colors.textPrimary} style={styles.badgeText}>
-                    3. टाइप करके लिखें (TYPE QUESTION)
-                  </Typography>
-                </View>
-              </View>
+          {/* Card 3: Progressive Details */}
+          <ProgressiveDetailsSection
+            typeText={typeText}
+            onTypeTextChange={setTypeText}
+            selectedCrop={selectedCrop}
+            onSelectCrop={setSelectedCrop}
+            location={location}
+            onLocationChange={setLocation}
+            urgency={urgency}
+            onUrgencyChange={setUrgency}
+          />
 
-              <Typography variant="h3" color={Colors.textPrimary} style={styles.title}>
-                यदि चाहें तो विवरण टाइप करें
-              </Typography>
-
-              <Input
-                placeholder="उदा. कपास के पत्तों पर पीलापन आ रहा है..."
-                value={typeText}
-                onChangeText={setTypeText}
-                multiline
-                numberOfLines={3}
-                style={styles.textAreaInput}
-              />
-            </View>
-
-            {/* Progressive Disclosure Optional Section */}
-            <ProgressiveDetailsSection
-              selectedCrop={selectedCrop}
-              onCropChange={setSelectedCrop}
-              location={location}
-              onLocationChange={setLocation}
-              urgency={urgency}
-              onUrgencyChange={setUrgency}
-            />
-
-            {/* Primary Action Button */}
+          {/* Bottom Primary Action Bar */}
+          <View style={styles.bottomBar}>
             <Button
-              title="आगे बढ़ें (Review Problem Summary)"
+              title={isAnalyzing ? 'Analyzing Input with AI...' : 'आगे बढ़ें (Proceed to Review)'}
               onPress={handleProceedToReview}
               variant="primary"
-              size="hero"
-              icon={<Ionicons name="arrow-forward" size={22} color={Colors.textInverse} />}
-              style={styles.proceedBtn}
+              size="large"
+              loading={isAnalyzing}
+              disabled={isAnalyzing}
             />
           </View>
-        )}
-
-        {/* ================= SCREEN 2: STRUCTURED INTERPRETATION REVIEW ================= */}
-        {step === 2 && (
+        </View>
+      ) : (
+        <View style={styles.stepContainer}>
           <ProblemReviewCard
             interpretation={interpretation}
             onConfirm={handleConfirmAndFindExpert}
             onEdit={() => setStep(1)}
           />
-        )}
-
-        {/* ================= SCREEN 3: SUCCESSFUL EXPERT MATCH ================= */}
-        {step === 3 && (
-          <View style={styles.successContainer}>
-            <View style={styles.successIconCircle}>
-              <Ionicons name="checkmark-done-circle" size={56} color={Colors.success} />
-            </View>
-
-            <Typography variant="h1" align="center" color={Colors.primaryDark}>
-              समस्या दर्ज हो गई है! (Query Submitted)
-            </Typography>
-
-            <Typography
-              variant="body"
-              align="center"
-              color={Colors.textSecondary}
-              style={styles.successSub}
-            >
-              आपकी समस्या आईसीएआर वैज्ञानिक **डॉ. सुरेश देशमुख** (सीनियर कॉटन रोग विशेषज्ञ) को भेज दी गई है।
-            </Typography>
-
-            <View style={styles.matchedExpertBox}>
-              <View style={styles.expertRow}>
-                <View style={styles.expertAvatarCircle}>
-                  <Typography variant="h3" color={Colors.primaryDark}>
-                    SD
-                  </Typography>
-                </View>
-                <View style={styles.expertInfo}>
-                  <Typography variant="h3" color={Colors.textPrimary}>
-                    Dr. Suresh Deshmukh
-                  </Typography>
-                  <Typography variant="label" color={Colors.primary}>
-                    Senior Plant Pathologist, ICAR
-                  </Typography>
-                  <Typography variant="caption" color={Colors.textSecondary}>
-                    Languages: Hindi, Marathi, English • Online Now
-                  </Typography>
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.successActions}>
-              <Button
-                title="विशेषज्ञ को अभी कॉल करें (Call Scientist)"
-                onPress={() =>
-                  Alert.alert(
-                    'Direct Call Initiated',
-                    'Connecting to Dr. Deshmukh on free Agri advice line...'
-                  )
-                }
-                variant="primary"
-                size="large"
-                icon={<Ionicons name="call" size={20} color={Colors.textInverse} />}
-              />
-
-              <Button
-                title="होम स्क्रीन पर जाएं (Back to Home)"
-                onPress={() => router.push('/')}
-                variant="outline"
-                size="medium"
-              />
-            </View>
-          </View>
-        )}
-      </View>
+        </View>
+      )}
     </ScreenContainer>
   );
 }
@@ -306,120 +223,27 @@ const styles = StyleSheet.create({
   topHeader: {
     backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xl,
+    paddingTop: Spacing.md,
     paddingBottom: Spacing.lg,
+    borderBottomLeftRadius: BorderRadius.xl,
+    borderBottomRightRadius: BorderRadius.xl,
+    marginBottom: Spacing.md,
+    ...Shadows.sm,
   },
   headerTitleRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    gap: Spacing.sm,
   },
   backBtn: {
-    marginRight: Spacing.md,
-    marginTop: 4,
+    padding: Spacing.xs,
   },
-  headerTextGroup: {
-    flex: 1,
+  stepContainer: {
+    paddingBottom: Spacing.xxl,
   },
-  headerSubtitle: {
-    marginTop: 4,
-  },
-  progressBarRow: {
-    flexDirection: 'row',
-    gap: Spacing.xs,
-    marginTop: Spacing.md,
-  },
-  progressStep: {
-    flex: 1,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  progressStepActive: {
-    backgroundColor: Colors.accent,
-  },
-  content: {
+  bottomBar: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.lg,
-    paddingBottom: Spacing.xxxl,
-  },
-  card: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.lg,
-    borderWidth: 1.5,
-    borderColor: Colors.cardBorder,
-    marginBottom: Spacing.lg,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.xs,
-  },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surfaceSecondary,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 4,
-    borderRadius: BorderRadius.full,
-  },
-  badgeText: {
-    marginLeft: 4,
-    fontSize: 11,
-  },
-  title: {
-    marginTop: 2,
-    marginBottom: Spacing.md,
-  },
-  textAreaInput: {
-    minHeight: 80,
-  },
-  proceedBtn: {
     marginTop: Spacing.md,
-  },
-  successContainer: {
-    paddingVertical: Spacing.xl,
-    alignItems: 'center',
-  },
-  successIconCircle: {
-    marginBottom: Spacing.md,
-  },
-  successSub: {
-    marginTop: Spacing.xs,
-    marginBottom: Spacing.xl,
-    maxWidth: 320,
-    lineHeight: 22,
-  },
-  matchedExpertBox: {
-    width: '100%',
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    borderWidth: 1.5,
-    borderColor: Colors.cardBorder,
-    marginBottom: Spacing.xl,
-    ...Shadows.card,
-  },
-  expertRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  expertAvatarCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: Colors.primaryContainer,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: Colors.primary,
-  },
-  expertInfo: {
-    marginLeft: Spacing.md,
-    flex: 1,
-  },
-  successActions: {
-    width: '100%',
-    gap: Spacing.md,
+    marginBottom: Spacing.lg,
   },
 });

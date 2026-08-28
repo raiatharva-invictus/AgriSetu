@@ -3,6 +3,7 @@ import { FarmerProfile, AgriculturalExpert, UserRole } from '@/types';
 import { mockFarmer, mockExperts } from '@/data/mockData';
 import { sessionService, UserSession } from '@/services/sessionService';
 import { authService } from '@/services/authService';
+import { supabase } from '@/lib/supabase';
 import { LanguageCode } from '@/locales';
 
 interface AuthContextType {

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, TouchableWithoutFeedback } from 'react-native';
 import { Colors, Spacing } from '@/constants/theme';
 import { Typography } from '../ui/Typography';
 import { BrandMark } from '../common/BrandMark';
@@ -12,26 +12,28 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onFinish();
-    }, 1200);
+    }, 600);
 
     return () => clearTimeout(timer);
   }, [onFinish]);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <BrandMark size="large" />
+    <TouchableWithoutFeedback onPress={onFinish}>
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <BrandMark size="large" />
 
-        <Typography
-          variant="body"
-          color={Colors.textSecondary}
-          align="center"
-          style={styles.tagline}
-        >
-          The right agricultural expertise, when you need it.
-        </Typography>
+          <Typography
+            variant="body"
+            color={Colors.textSecondary}
+            align="center"
+            style={styles.tagline}
+          >
+            The right agricultural expertise, when you need it.
+          </Typography>
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 

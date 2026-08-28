@@ -14,6 +14,9 @@ export interface ProblemInterpretation {
   urgency: string;
   voiceNoteAttached: boolean;
   photoAttached: boolean;
+  isLiveProvider?: boolean;
+  provider?: string;
+  modelUsed?: string;
 }
 
 interface ProblemReviewCardProps {
