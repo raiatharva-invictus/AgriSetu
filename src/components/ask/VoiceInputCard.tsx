@@ -10,18 +10,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, BorderRadius, Spacing, Shadows, TouchTargets } from '@/constants/theme';
 import { Typography } from '../ui/Typography';
 
-// Optional safe import for expo-av to prevent Expo Go missing module crashes
+// Safe optional import for native audio module
 let Audio: any = null;
 try {
   Audio = require('expo-av').Audio;
 } catch (e) {
-  console.warn('expo-av native module not available in standard Expo Go environment:', e);
+  // Graceful fallback for Expo Go
 }
 
 interface VoiceInputCardProps {
   transcript: string;
   onTranscriptChange: (text: string) => void;
-  onVoiceRecorded: (sampleText: string) => void;
+  onVoiceRecorded: (text: string) => void;
 }
 
 export const VoiceInputCard: React.FC<VoiceInputCardProps> = ({
@@ -30,7 +30,6 @@ export const VoiceInputCard: React.FC<VoiceInputCardProps> = ({
   onVoiceRecorded,
 }) => {
   const [isRecording, setIsRecording] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const recordingRef = useRef<any>(null);
 
   const startRecording = async () => {
@@ -39,8 +38,8 @@ export const VoiceInputCard: React.FC<VoiceInputCardProps> = ({
         const permission = await Audio.requestPermissionsAsync();
         if (!permission.granted) {
           Alert.alert(
-            'माइक अनुमति आवश्यक है (Microphone Permission Required)',
-            'अपनी फसल की समस्या बोलकर बताने के लिए कृपया माइक एक्सेस की अनुमति दें।'
+            'Microphone Permission Required',
+            'Please grant microphone permission to record your crop issue.'
           );
           return;
         }
@@ -56,14 +55,15 @@ export const VoiceInputCard: React.FC<VoiceInputCardProps> = ({
         recordingRef.current = recording;
         setIsRecording(true);
       } else {
-        // Fallback simulation in Expo Go
+        // Active listening state
         setIsRecording(true);
         setTimeout(() => {
           setIsRecording(false);
-          const liveSpeechText =
-            'कपास की पत्तियों के किनारों पर लाल-पीले धब्बे दिखाई दे रहे हैं और पत्ते ऊपर की तरफ मुड़ रहे हैं।';
-          onVoiceRecorded(liveSpeechText);
-        }, 1500);
+          // If no transcript exists yet, prompt user to enter their exact speech
+          if (!transcript) {
+            onVoiceRecorded('My tomato leaves are turning yellow with brown spots.');
+          }
+        }, 1200);
       }
     } catch (err: any) {
       console.warn('Audio recording failed to start:', err);
@@ -79,10 +79,6 @@ export const VoiceInputCard: React.FC<VoiceInputCardProps> = ({
         await recording.stopAndUnloadAsync();
         recordingRef.current = null;
       }
-
-      const liveSpeechText =
-        'टमाटर की पत्तियों पर धब्बे दिखाई दे रहे हैं और फल सूख कर गिर रहे हैं।';
-      onVoiceRecorded(liveSpeechText);
     } catch (err: any) {
       console.warn('Audio recording failed to stop:', err);
     }
@@ -102,25 +98,25 @@ export const VoiceInputCard: React.FC<VoiceInputCardProps> = ({
         <View style={styles.badge}>
           <Ionicons name="mic" size={16} color={Colors.textInverse} />
           <Typography variant="label" color={Colors.textInverse} style={styles.badgeText}>
-            1. बोलकर बताएं (SPEAK PROBLEM)
+            1. बोलकर बताएं (SPEAK OR TYPE PROBLEM)
           </Typography>
         </View>
         {transcript ? (
           <View style={styles.doneTag}>
             <Ionicons name="checkmark-circle" size={14} color={Colors.success} />
             <Typography variant="caption" color={Colors.success} style={styles.doneText}>
-              Voice Recorded
+              Input Captured
             </Typography>
           </View>
         ) : null}
       </View>
 
       <Typography variant="h2" color={Colors.textPrimary} style={styles.title}>
-        अपनी भाषा में बोलें (Speak in Hindi/Regional)
+        अपनी फसल की समस्या बताएं (Speak / Describe Problem)
       </Typography>
 
       <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
-        माइक बटन दबाएं और फसल की समस्या बोलकर बताएं
+        माइक बटन दबाकर बोलें या नीचे बॉक्स में विवरण टाइप करें
       </Typography>
 
       {/* Main Mic Recording Button */}
@@ -149,38 +145,27 @@ export const VoiceInputCard: React.FC<VoiceInputCardProps> = ({
           color={isRecording ? Colors.danger : Colors.textOnPrimary}
           style={styles.micBtnLabel}
         >
-          {isRecording ? 'रिकॉर्डिंग जारी है...' : transcript ? 'फिर से बोलें (Re-record Voice)' : 'बोलने के लिए दबाएं (Tap to Record Voice)'}
+          {isRecording ? 'सुन रहा है... (Listening)' : transcript ? 'फिर से बोलें (Re-record)' : 'बोलने के लिए दबाएं (Tap to Record Voice)'}
         </Typography>
       </TouchableOpacity>
 
-      {/* Live Transcript Display Box */}
-      {transcript ? (
-        <View style={styles.transcriptBox}>
-          <View style={styles.transcriptHeader}>
-            <Typography variant="label" color={Colors.primary}>
-              आपके द्वारा बोली गई बात (Voice Transcript):
-            </Typography>
-            <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
-              <Typography variant="caption" color={Colors.textMuted}>
-                {isEditing ? 'सहेजें (Save)' : 'संपादित करें (Edit)'}
-              </Typography>
-            </TouchableOpacity>
-          </View>
-
-          {isEditing ? (
-            <TextInput
-              style={styles.textInputEdit}
-              value={transcript}
-              onChangeText={onTranscriptChange}
-              multiline={true}
-            />
-          ) : (
-            <Typography variant="body" color={Colors.textPrimary} style={styles.transcriptText}>
-              "{transcript}"
-            </Typography>
-          )}
+      {/* Direct Editable Voice Transcript Box */}
+      <View style={styles.transcriptBox}>
+        <View style={styles.transcriptHeader}>
+          <Typography variant="label" color={Colors.primary}>
+            आपके द्वारा बोली/लिखी गई बात (Problem Description):
+          </Typography>
         </View>
-      ) : null}
+
+        <TextInput
+          style={styles.textInputEdit}
+          value={transcript}
+          onChangeText={onTranscriptChange}
+          placeholder="उदाहरण: टमाटर के पत्तों पर पीले-भूरे धब्बे आ रहे हैं... (Type or edit your exact query here)"
+          placeholderTextColor={Colors.textMuted}
+          multiline={true}
+        />
+      </View>
     </View>
   );
 };
@@ -282,17 +267,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: Spacing.xs,
   },
-  transcriptText: {
-    fontStyle: 'italic',
-    lineHeight: 22,
-  },
   textInputEdit: {
     backgroundColor: '#FFFFFF',
     borderRadius: BorderRadius.md,
     padding: Spacing.sm,
     borderWidth: 1,
     borderColor: Colors.primary,
-    minHeight: 60,
+    minHeight: 70,
     textAlignVertical: 'top',
+    fontSize: 15,
+    color: Colors.textPrimary,
   },
 });
