@@ -34,7 +34,7 @@ export const CameraInputCard: React.FC<CameraInputCardProps> = ({
       }
 
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         quality: 0.8,
         allowsEditing: true,
       });
@@ -52,7 +52,7 @@ export const CameraInputCard: React.FC<CameraInputCardProps> = ({
   const handleLaunchGallery = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         quality: 0.8,
         allowsEditing: true,
       });
@@ -176,20 +176,20 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.md,
     gap: Spacing.sm,
-    minHeight: TouchTargets.minHeight,
+    minHeight: TouchTargets.standard,
   },
   galleryBtn: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.backgroundSecondary,
+    backgroundColor: Colors.surfaceSecondary,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.md,
     gap: Spacing.xs,
-    minHeight: TouchTargets.minHeight,
+    minHeight: TouchTargets.standard,
   },
   btnLabel: {
     fontWeight: '600',

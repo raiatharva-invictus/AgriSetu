@@ -59,11 +59,7 @@ export const VoiceInputCard: React.FC<VoiceInputCardProps> = ({
         setIsRecording(true);
         setTimeout(() => {
           setIsRecording(false);
-          // If no transcript exists yet, prompt user to enter their exact speech
-          if (!transcript) {
-            onVoiceRecorded('My tomato leaves are turning yellow with brown spots.');
-          }
-        }, 1200);
+        }, 1000);
       }
     } catch (err: any) {
       console.warn('Audio recording failed to start:', err);
@@ -224,7 +220,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.xs,
-    minHeight: TouchTargets.minHeight + 20,
+    minHeight: TouchTargets.standard + 20,
     ...Shadows.sm,
   },
   micHeroBtnDefault: {
@@ -255,7 +251,7 @@ const styles = StyleSheet.create({
   },
   transcriptBox: {
     marginTop: Spacing.md,
-    backgroundColor: Colors.backgroundSecondary,
+    backgroundColor: Colors.surfaceSecondary,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     borderWidth: 1,

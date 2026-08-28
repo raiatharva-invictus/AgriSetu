@@ -187,10 +187,8 @@ export default function AskHelpScreen() {
 
           {/* Card 3: Progressive Details */}
           <ProgressiveDetailsSection
-            typeText={typeText}
-            onTypeTextChange={setTypeText}
             selectedCrop={selectedCrop}
-            onSelectCrop={setSelectedCrop}
+            onCropChange={setSelectedCrop}
             location={location}
             onLocationChange={setLocation}
             urgency={urgency}
